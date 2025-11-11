@@ -1,0 +1,14 @@
+#include "GML.hpp"
+
+int main()
+{
+    GML gml;            // Создание объекта модели
+    gml.AddGen<G1>();   // Добавление пользовательского гена из "include/Genes.hpp"
+    gml.AddGen<G2>();   // Добавление пользовательского гена из "include/Genes.hpp"
+    gml.Init(10);       // Инициализация модели с 10 случайными генами
+    gml.Run();          // Запуск модели
+
+    return 0;
+}
+
+
