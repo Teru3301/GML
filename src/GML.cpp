@@ -1,42 +1,41 @@
-
 #include "GML.hpp"
+#include <random>
 
-template<typename T>
-void GML::AddGen()
-{
-    // Добавляем фабричную функцию, которая создает новый объект типа T
-    this->BaseGenes.push_back([]() -> Gene* { return new T(); });
-}
 
-void GML::Init(unsigned int length)
-{
-    if (this->BaseGenes.size() == 0) throw "Impossible to init without genes!";
-    if (length == 0) throw "Impossible to init without genes!";
+
+void GML::Init(unsigned int length) {
+    DNA.clear();
+    if (this->is_init) throw "The model has already been initialized!";
+    if (generators.empty()) throw "Impossible to init without genes!";
+    if (length == 0)  throw "Impossible to init without genes!";
     
-    // Очищаем предыдущие гены, если они есть
-    this->Gen.clear();
-    
-    // Создаем новые объекты через фабрики
-    for (int i = 0; i < length; i++)
-    {
-        int randomIndex = rand() % this->BaseGenes.size();
-        Gene* gen = this->BaseGenes[randomIndex](); // Создаем новый объект
-        gen->Mutate();
-        this->Gen.push_back(gen);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<size_t> dis(0, generators.size() - 1);
+
+    for (int i = 0; i < length; ++i) {
+        size_t random_index = dis(gen);
+        DNA.push_back(generators[random_index]());
     }
-    this->DNA_LENGTH = length;
+    for (auto& gen : this->DNA)
+        gen->Init();
+
     this->is_init = true;
 }
 
-void GML::Run()
-{
-    if (this->Gen.size() == 0) throw "Impossible to run without genes!";
-    if (this->is_init) for (auto gen : this->Gen) gen->Run();
-    else throw "Cannot be started before initialization!";
+
+bool GML::clearDNA() {
+    DNA.clear();
+    return true;
 }
 
-// Явная инстанциация шаблонов для используемых типов
-template void GML::AddGen<G1>();
-template void GML::AddGen<G2>();
+
+void GML::Run()
+{
+    if (!this->is_init) throw "The model must be initialized before running!";
+
+    for (auto& gen : this->DNA)
+        gen->Run();
+}
 
 

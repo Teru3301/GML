@@ -1,22 +1,60 @@
-
-#include "Genes.hpp"
+#pragma once
+#include <memory>
 #include <vector>
 #include <functional>
 
 
 
-class GML
-{
+// ===============================================================================
+//
+//  Базовый класс гена
+//
+//  Виртуальные методы обязаны быть переопределены в классах наследниках.
+//
+// ===============================================================================
+class BaseGen {
+public:
+    virtual ~BaseGen() = default;
+    virtual void Init() = 0;
+    virtual void Mutate() = 0;
+    virtual void Run() = 0;
+};
+
+
+
+// ===============================================================================
+//
+//  Класс модели
+//
+//  AddGen(Usergen) - Добавляет новый ген в геновонд
+//  Init(length)    - Создаёт список генов случайных зараннее переданных генов
+//                    длины length. Не может быть выполнено если не было передано
+//                    ни одного наследника класса BaseGen.
+//  Run()           - Последовательно выполняет каждый ген из цепочки полученной
+//                    после инициализации. Не может быть выполнено до 
+//                    инициализации.
+//
+// ===============================================================================
+class GML {
 public:
     template<typename T>
-    void AddGen();                         // добавление типа гена
-    void Init(unsigned int length);        // инициализация модели
-    void Run();                            // запускает выполнение модели
-    int  Fit();                            // возвращает коэффициент приспособленности модели
+    void AddGen() {
+        static_assert(std::is_base_of<BaseGen, T>::value, 
+                     "T must be derived from BaseGen");
+        
+        generators.push_back([]() -> std::unique_ptr<BaseGen> {
+            return std::make_unique<T>();
+        });
+    }
+
+    void Init(unsigned int length);
+    void Run();
+
 
 private:
-    unsigned int DNA_LENGTH;
-    std::vector<std::function<Gene*()>> BaseGenes;  // фабрики генов
-    std::vector<Gene*> Gen;                // копии объектов
+    std::vector<std::function<std::unique_ptr<BaseGen>()>> generators;
+    std::vector<std::unique_ptr<BaseGen>> DNA;
+
+    bool clearDNA();
     bool is_init = false;
 };
