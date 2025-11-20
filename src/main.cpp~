@@ -1,0 +1,161 @@
+#include "UserGenes.hpp"
+
+#include <cstddef>
+#include <iostream>
+#include <bitset>
+#include <cmath>
+#include <algorithm>
+#include <memory>
+#include <list>
+
+void print_binary(std::byte b) {
+    std::cout << std::bitset<8>(std::to_integer<unsigned>(b)) << '\n';
+}
+
+
+
+int main() {
+    std::list<GML> gml_vec;
+//    std::vector<GML> gml_vec;       // Популяция геномов
+    unsigned int count_gml = 1000;  // Размер популяции
+    unsigned int gml_len = 10;      // Исходная длина ДНК
+    unsigned int elite = 100;
+
+    //  Инициализация популяции
+    for (int i = 0; i < count_gml; i++)
+    {
+        GML gml;                    // Создание объекта моели
+        gml.AddGen<gddOR>();        // Добавление пользовательского гена в генофонд
+        gml.AddGen<gndOR>();        // Добавление пользовательского гена в генофонд
+        gml.AddGen<gddAND>();       // ...
+        gml.AddGen<gndAND>();       // ...
+        gml.AddGen<gddXOR>();       // ...
+        gml.AddGen<gndXOR>();       // ...
+        gml.AddGen<gdNOT>();        // ...
+        gml.AddGen<gdnSL>();        // ...
+        gml.AddGen<gdnSR>();        // ...
+        gml.AddGen<gREPL>();        // ...
+        gml.AddGen<gSKIP>();        // ...
+
+        gml_vec.push_back(gml);     // Добавление новой особи в популяцию
+    }
+
+    for (auto& gml : gml_vec)
+    {
+        gml.Init(gml_len);          // Инициализация модели случайными генами
+        gml.Mutate();               // Случайная мутация
+    }
+
+    std::vector<std::vector<std::byte>> x_train;
+        std::vector<std::byte>              y_train;
+        {
+            for (int i = 0; i = 10; i++)
+            {
+            unsigned char n1 = rand() % 10;
+            unsigned char n2 = rand() % 10;
+            unsigned char n3 = n1 + n2;
+            std::byte a = std::byte{n1};
+            std::byte b = std::byte{n2};
+            std::byte c = std::byte{n3};
+        
+            std::vector<std::byte> data;
+            data.push_back(a);
+            data.push_back(b);
+            
+            x_train.push_back(data);
+            y_train.push_back(c);
+            }
+        }
+
+
+
+
+    //  Селекция популяции
+    for (int ep = 0; ep < 1000; ep++)
+    {
+        // Оценка особей
+        /*
+        for (int i = 0; i < count_gml; i++)
+        {
+            std::vector<std::byte> inp;
+            std::byte a = std::byte{2};
+            std::byte b = std::byte{3};
+            inp.push_back(a);
+            inp.push_back(b);
+
+            gml_vec[i].Run(inp);
+
+            gml_vec[i].score += 1 - abs(1 - inp.size());
+        }
+        */
+
+        
+        for (auto& gml : gml_vec) {
+            for (int i = 0; i < x_train.size(); i++)
+            {
+                std::vector<std::byte> inp = x_train[i];
+                std::byte out              = y_train[i];
+                gml.Run(inp);
+                if (inp.size() > 0)
+                {
+                    if (inp.size() == 1) gml.score += 1;
+                    if (inp[0] == out) gml.score += 1;
+                }
+            }
+        }
+
+        // Сортикровка по набраным очкам
+        /*
+        std::sort(gml_vec.begin(), gml_vec.end(), 
+            [](const GML& a, const GML& b) {
+                return a.score > b.score;
+            });
+        */
+
+        gml_vec.sort([](const GML& a, const GML& b) {
+            return a.score > b.score;  // Сортируем по убыванию score
+        });
+
+        // Замена и мутация особей не прошедших отбор
+        /*
+        for (int i = 0; i < count_gml; i++)
+        {
+            gml_vec[i].score = 0;
+            if (i > elite) gml_vec[i].Mutate();
+        }
+        */
+        int i = 0;
+        for (auto& gml : gml_vec) {
+            gml.score = 0;
+            if (i > elite) {
+                gml.Mutate();
+            }
+            i++;
+        }
+    }
+
+
+    for (int i = 0; i < x_train.size(); i++)
+    {
+        std::vector<std::byte> inp = x_train[i];
+        std::byte out              = y_train[i];
+        gml_vec.front().Run(inp);
+        if (inp.size() > 0)
+        {
+            if (inp.size() == 1) gml_vec.front().score += 1;
+            if (inp[0] == out) gml_vec.front().score += 1;
+        }
+        std::cout << "-------" << std::endl;
+        for (auto v : inp)
+        {
+            print_binary(v);
+            print_binary(out);
+        }
+    }
+
+
+    return 0;
+}
+
+
+

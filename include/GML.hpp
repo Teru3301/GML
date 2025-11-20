@@ -2,6 +2,11 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <type_traits>
+#include <string>
+
+constexpr int MAX_BYTE = 255;
+constexpr int MAX_BYTE_LEN = 8;
 
 
 
@@ -12,12 +17,25 @@
 //  Виртуальные методы обязаны быть переопределены в классах наследниках.
 //
 // ===============================================================================
+
 class BaseGen {
 public:
     virtual ~BaseGen() = default;
-    virtual void Init() = 0;
+    virtual void Init(unsigned int max_index) = 0;
     virtual void Mutate() = 0;
-    virtual void Run() = 0;
+    virtual void Run(std::vector<std::byte>& data) = 0;
+    virtual std::unique_ptr<BaseGen> Clone() const = 0;
+    int max_index;
+    std::string code;
+};
+
+// CRTP класс для клонирования
+template<typename Derived>
+class Cloneable : public BaseGen {
+public:
+    std::unique_ptr<BaseGen> Clone() const override {
+        return std::make_unique<Derived>(static_cast<const Derived&>(*this));
+    }
 };
 
 
@@ -35,21 +53,30 @@ public:
 //                    инициализации.
 //
 // ===============================================================================
+
 class GML {
 public:
     template<typename T>
-    void AddGen() {
+    void AddGen()
+    {
         static_assert(std::is_base_of<BaseGen, T>::value, 
                      "T must be derived from BaseGen");
         
-        generators.push_back([]() -> std::unique_ptr<BaseGen> {
+        generators.push_back([]() -> std::unique_ptr<BaseGen>
+        {
             return std::make_unique<T>();
         });
     }
 
-    void Init(unsigned int length);
-    void Run();
+    GML (){};
+    GML(const GML& other); 
 
+    void Mutate(double mut);
+    void Cross(GML& other);
+    void Init(unsigned int length);
+    void Run(std::vector<std::byte>& data);
+    int score;
+    std::string code();
 
 private:
     std::vector<std::function<std::unique_ptr<BaseGen>()>> generators;
@@ -58,3 +85,6 @@ private:
     bool clearDNA();
     bool is_init = false;
 };
+
+
+
