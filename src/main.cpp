@@ -1,11 +1,9 @@
+#include "SandardGenes.hpp"
 #include "UserGenes.hpp"
 
 #include <cstddef>
 #include <iostream>
 #include <bitset>
-#include <cmath>
-#include <algorithm>
-#include <memory>
 #include <list>
 
 void print_binary(std::byte b) {
@@ -17,27 +15,27 @@ void print_binary(std::byte b) {
 int main() {
     std::list<GML> gml_vec;  // Популяция геномов
     unsigned int count_gml = 10000;  // Размер популяции
-    unsigned int gml_len = 100;      // Исходная длина ДНК
+    unsigned int gml_len = 10;      // Исходная длина ДНК
     unsigned int elite = 10;
     unsigned int epohs = 100;
     double mut = 0.05;
-    int train_size = 5;
+    int train_size = 2;
 
     //  Инициализация популяции
     for (int i = 0; i < count_gml; i++)
     {
         GML gml;                    // Создание объекта моели
-        gml.AddGen<gddOR>();        // Добавление пользовательского гена в генофонд
-        gml.AddGen<gndOR>();        // Добавление пользовательского гена в генофонд
-        gml.AddGen<gddAND>();       // ...
-        gml.AddGen<gndAND>();       // ...
-        gml.AddGen<gddXOR>();       // ...
-        gml.AddGen<gndXOR>();       // ...
-        gml.AddGen<gdNOT>();        // ...
-        gml.AddGen<gdnSL>();        // ...
-        gml.AddGen<gdnSR>();        // ...
-        gml.AddGen<gREPL>();        // ...
-        gml.AddGen<gSKIP>();        // ...
+        gml.AddGen<ByteGenes::gddAND>();        // Добавление пользовательского гена в генофонд
+        gml.AddGen<ByteGenes::gndOR>();        // Добавление пользовательского гена в генофонд
+        gml.AddGen<ByteGenes::gddAND>();       // ...
+        gml.AddGen<ByteGenes::gndAND>();       // ...
+        gml.AddGen<ByteGenes::gddXOR>();       // ...
+        gml.AddGen<ByteGenes::gndXOR>();       // ...
+        gml.AddGen<ByteGenes::gdNOT>();        // ...
+        gml.AddGen<ByteGenes::gdnSL>();        // ...
+        gml.AddGen<ByteGenes::gdnSR>();        // ...
+        gml.AddGen<StdGenes::gREPL>();        // ...
+        gml.AddGen<StdGenes::gSKIP>();        // ...
 
         gml_vec.push_back(gml);     // Добавление новой особи в популяцию
     }
@@ -45,7 +43,7 @@ int main() {
     for (auto& gml : gml_vec)
     {
         gml.Init(gml_len);          // Инициализация модели случайными генами
-        gml.Mutate(mut);               // Случайная мутация
+        gml.Mutate(mut);            // Случайная мутация
     }
 
     // Создание обучающей выборки

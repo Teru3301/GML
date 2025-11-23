@@ -14,8 +14,6 @@ constexpr int MAX_BYTE_LEN = 8;
 //
 //  Базовый класс гена
 //
-//  Виртуальные методы обязаны быть переопределены в классах наследниках.
-//
 // ===============================================================================
 
 class BaseGen {
@@ -25,8 +23,12 @@ public:
     virtual void Mutate() = 0;
     virtual void Run(std::vector<std::byte>& data) = 0;
     virtual std::unique_ptr<BaseGen> Clone() const = 0;
+    const std::string& GetCode() const { return code; }
+protected: 
     int max_index;
-    std::string code;
+    bool is_init = false;
+    std::vector<int> params;
+    std::string code = "--";
 };
 
 // CRTP класс для клонирования

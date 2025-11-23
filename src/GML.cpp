@@ -1,5 +1,6 @@
 #include "GML.hpp"
 #include <random>
+#include <stdexcept>
 
 
 
@@ -18,10 +19,10 @@ GML::GML(const GML& other) {
 
 void GML::Cross(GML& other) {
     if (!this->is_init || !other.is_init) 
-        throw "Both models must be initialized before cross!";
+        throw std::runtime_error("Both models must be initialized before cross!");
     
     if (this->DNA.size() != other.DNA.size())
-        throw "Both models must have the same DNA length for cross!";
+        throw std::runtime_error("Both models must have the same DNA length for cross!");
     
     // Если DNA слишком короткое для двухточечного скрещивания, используем одноточечное
     if (this->DNA.size() <= 2) {
@@ -59,40 +60,38 @@ void GML::Cross(GML& other) {
     other.score = 0;
 }
 
-// Остальные методы GML остаются без изменений...
+
 void GML::Mutate(double mut) {
-    if (!this->is_init) throw "The model must be initialized before mutation!";
-    if (generators.empty()) throw "No generators available for mutation!";
+    if (!this->is_init) throw std::runtime_error("The model must be initialized before running!");
+    if (generators.empty()) throw std::runtime_error("No generators available for mutation!");
     
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<double> chance_dist(0.0, 1.0);
     std::uniform_int_distribution<size_t> gen_dist(0, generators.size() - 1);
 
-
     double chance = chance_dist(gen);
-    //double chance = (double(rand() % 1000) / 1000.0);
     if (chance < mut) {
-    for (size_t i = 0; i < this->DNA.size(); i++) {
-        int r = rand() % 10;
-        if (r == 0) {
-            size_t random_index = gen_dist(gen);
-            DNA[i] = generators[random_index]();
-            DNA[i]->Init(this->DNA.size());
+        for (size_t i = 0; i < this->DNA.size(); i++) {
+            int r = rand() % 10;
+            if (r == 0) {
+                size_t random_index = gen_dist(gen);
+                DNA[i] = generators[random_index]();
+                DNA[i]->Init(this->DNA.size());
+                DNA[i]->Mutate();
+            }
             DNA[i]->Mutate();
         }
-        DNA[i]->Mutate();
-        
-    }
     }
 }
+
 
 void GML::Init(unsigned int length) {
     this->score = 0;
     DNA.clear();
-    if (this->is_init) throw "The model has already been initialized!";
-    if (generators.empty()) throw "Impossible to init without genes!";
-    if (length == 0)  throw "Impossible to init without genes!";
+    if (this->is_init) throw std::runtime_error("The model has already been initialized!");
+    if (generators.empty()) throw std::runtime_error("Impossible to init without genes!");
+    if (length == 0)  throw std::runtime_error("Impossible to init without genes!");
     
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -109,13 +108,15 @@ void GML::Init(unsigned int length) {
     this->is_init = true;
 }
 
+
 bool GML::clearDNA() {
     DNA.clear();
     return true;
 }
 
+
 void GML::Run(std::vector<std::byte>& data) {
-    if (!this->is_init) throw "The model must be initialized before running!";
+    if (!this->is_init) throw std::runtime_error("The model must be initialized before running!");
     for (auto& gen : this->DNA)
         gen->Run(data);
 }
@@ -127,8 +128,11 @@ std::string GML::code()
     for (auto& gen : DNA)
     {
         code += " ";
-        code += gen->code;
+        code += gen->GetCode();
         code += " ";
     }
     return code;
 }
+
+
+
