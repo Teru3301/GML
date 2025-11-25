@@ -12,16 +12,61 @@ constexpr int MAX_BYTE_LEN = 8;
 
 // ===============================================================================
 //
+//  Исполнитель генов
+//
+// ===============================================================================
+
+class Agent
+{
+public:
+    std::vector<std::byte> inp;
+
+    unsigned int max_iterations;
+    unsigned int exec_index = 0;
+    bool exec = true;
+    bool find_fi = false;
+
+
+    void ConditionStart()
+    {
+        if (this->stack_predicat.size() == 0)
+            this->find_fi = true;
+        else if (!this->stack_predicat[this->stack_predicat.size() - 1])
+            this->find_fi = true;
+        else 
+            this->stack_predicat.pop_back();
+    }
+
+    void ConditionEnd()
+    {
+        this->find_fi = false;
+    }
+
+    void AddPredicat(bool res)
+    {
+        stack_predicat.push_back(res);
+    }
+
+private:
+    std::vector<bool> stack_predicat;
+
+};
+
+
+
+// ===============================================================================
+//
 //  Базовый класс гена
 //
 // ===============================================================================
 
-class BaseGen {
+class BaseGen 
+{
 public:
     virtual ~BaseGen() = default;
     virtual void Init(unsigned int max_index) = 0;
     virtual void Mutate() = 0;
-    virtual void Run(std::vector<std::byte>& data) = 0;
+    virtual void Run(Agent& agent) = 0;
     virtual std::unique_ptr<BaseGen> Clone() const = 0;
     const std::string& GetCode() const { return code; }
 protected: 
@@ -56,7 +101,8 @@ public:
 //
 // ===============================================================================
 
-class GML {
+class GML
+{
 public:
     template<typename T>
     void AddGen()
@@ -73,12 +119,14 @@ public:
     GML (){};
     GML(const GML& other); 
 
-    void Mutate(double mut);
+    void Mutate(double mut1, double mut2);
     void Cross(GML& other);
     void Init(unsigned int length);
-    void Run(std::vector<std::byte>& data);
+    void Run(Agent& agent);
+    GML& operator=(const GML& other);
     int score;
-    std::string code();
+    std::string Code();
+    unsigned int DNAlen() const;
 
 private:
     std::vector<std::function<std::unique_ptr<BaseGen>()>> generators;
