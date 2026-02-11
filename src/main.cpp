@@ -43,7 +43,10 @@ void evaluate_population_segment(
                 // Количество совпавших битов = 8 - количество различных битов
                 int matched_bits = 8 - bits.count();
                 //gml_vec[i].score += matched_bits;
-                //if (gml_vec[i].DNAlen() < 10) gml_vec[i].score -= 10;
+                int min_len = 15;
+                int max_len = 70;
+                if (gml_vec[i].DNAlen() < min_len) gml_vec[i].score -= min_len - gml_vec[i].DNAlen();
+                if (gml_vec[i].DNAlen() > max_len) gml_vec[i].score -= gml_vec[i].DNAlen() - max_len;
                 if (a.inp[0] == out) gml_vec[i].score += 8;
             }
         }
@@ -53,17 +56,18 @@ void evaluate_population_segment(
 int main() {
     std::vector<GML> gml_vec;           // Популяция
     unsigned int count_gml = 10000;     // Размер популяции
-    unsigned int gml_len = 100;         // Длина ДНК
-    unsigned int elite = 100;          // Количество элитных особей
+    unsigned int gml_len = 1;           // Длина ДНК
+    unsigned int elite = 100;           // Количество элитных особей
     unsigned int epohs = 100;           // Количество эпох обучения
     unsigned int max_i = 100;           // Количество эпох обучения
     double mut1 = 0.1;                  // Шанс мутации отдельного гена
     double mut2 = 0.01;                 // Шанс замены гена
-    int train_size = 5;                 // Количество примеров для обучения
+    int train_size = 10;                // Количество примеров для обучения
 
     // Определяем количество потоков
     unsigned int num_threads = std::thread::hardware_concurrency();
     if (num_threads == 0) num_threads = 4; // fallback
+    num_threads = 1;
     std::cout << "Using " << num_threads << " threads for evaluation" << std::endl;
 
     gml_vec.reserve(count_gml);
@@ -76,9 +80,10 @@ int main() {
         gml.AddGen<ByteGenes::NOT>();           // ...
         gml.AddGen<ByteGenes::ShiftL>();        // ...
         gml.AddGen<ByteGenes::ShiftR>();        // ...
-        gml.AddGen<StdGenes::REPL>();           // ...
+        //gml.AddGen<StdGenes::REPL>();           // ...
         gml.AddGen<StdGenes::COPY>();           // ...
         gml.AddGen<StdGenes::SWAP>();           // ...
+        gml.AddGen<StdGenes::SKIP>();           // ...
         gml.AddGen<StdGenes::IF>();             // ...
         gml.AddGen<StdGenes::FI>();             // ...
         gml.AddGen<ByteGenes::EQdd>();          // ...
@@ -145,6 +150,7 @@ int main() {
             thread.join();
         }
 
+        /*
         // Сортировка по набранным очкам
         static std::vector<GML*> gml_ptrs;
         gml_ptrs.clear();
@@ -157,6 +163,7 @@ int main() {
         // Сортируем указатели
         std::sort(gml_ptrs.begin(), gml_ptrs.end(), 
             [ep](const GML* a, const GML* b) {
+                return a->score > b->score;  // Высший score = лучше
                 if (ep < 10)
                     return a->score > b->score;  // Высший score = лучше
                 else
@@ -175,18 +182,33 @@ int main() {
             sorted_vec.push_back(std::move(*ptr));
         }
         gml_vec = std::move(sorted_vec);
+        */
 
-        int bs = gml_vec.front().score;
+
+        // ИСПРАВЛЕННАЯ СОРТИРОВКА - без использования указателей
+        std::sort(gml_vec.begin(), gml_vec.end(), 
+            [ep](const GML& a, const GML& b) {
+                return a.score > b.score;  // Высший score = лучше
+                if (a.score != b.score)
+                    return a.score > b.score;  // Высший score = лучше
+                else
+                    return a.DNAlen() < b.DNAlen();  // Меньшая длина = лучше
+            });
+
+
+        int bs = gml_vec[0].score;
         int ms = train_size * 8;
-        std::cout << " \tbest score: " << bs << " / " << ms << " \t" << int((double(bs) / double(ms)) * 100) << "%" << std::endl;
+        std::cout << " \tbest score: " 
+            << bs << " / " << ms << " \t" 
+            << int((double(bs) / double(ms)) * 100) << "%" 
+            << std::endl;
 
-        {
-            std::lock_guard<std::mutex> lock(cout_mutex);
-            for (int i = 0; i < gml_vec.size() && i < 20; i++) {
-                std::cout << "[" << gml_vec[i].Code().substr(0, 140) << "... ] [" << gml_vec[i].score << "]" << std::endl;
-            }
-        }
-
+        for (int i = 0; i < gml_vec.size() && i < 20; i++)
+            std::cout 
+                << "[" << gml_vec[i].score << "] \t"
+                << "[" << gml_vec[i].DNAlen() << "] \t"
+                << "[" << gml_vec[i].Code().substr(0, 150)
+                << "... ]" << std::endl;
 
         // Замена и мутация особей не прошедших отбор
         for (int i = elite; i < count_gml; i++)

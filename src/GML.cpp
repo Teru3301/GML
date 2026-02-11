@@ -105,11 +105,6 @@ void GML::Cross(GML& other) {
 }
 
 
-
-
-
-
-
 void GML::Mutate(double mut1, double mut2) {
     if (!this->is_init) throw std::runtime_error("The model must be initialized before running!");
     if (generators.empty()) throw std::runtime_error("No generators available for mutation!");
@@ -193,7 +188,6 @@ std::string GML::Code()
     }
     return code;
 }
-
 
 
 GML& GML::operator=(const GML& other) {
