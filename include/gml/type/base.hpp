@@ -2,6 +2,8 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
+#include <bitset>
 
 
 
@@ -10,15 +12,13 @@ namespace gml::type
 
     union value
     {
-        int i;
-        float f;
+        std::uint32_t   u32;
+        std::int32_t    i32;
+        float           f32;
         struct {
             bool b : 1;
         };
-        std::byte byte1;
-        std::byte byte2;
-        std::byte byte3;
-        std::byte byte4;
+        std::byte byte[4];
     };
 
 }
