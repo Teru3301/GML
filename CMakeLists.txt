@@ -11,10 +11,6 @@ include_directories(
     lib
 )
 
-add_executable(GML
-    ./src/main.cpp
-    ./src/GML.cpp 
-)
-
-
+file(GLOB_RECURSE SRC "src/*.cpp")
+add_executable(GML ${SRC})
 
