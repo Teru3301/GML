@@ -12,6 +12,7 @@ namespace gml::vm::storage
     {
     private:
         std::vector<gml::type::value> data;
+        bool inited = false;
         uint32_t storage_size = 10000;
 
     public:
@@ -19,6 +20,13 @@ namespace gml::vm::storage
         void write(const gml::type::value& addr, const gml::type::value& val);
         void erase(const gml::type::value& addr);
 
+        void init(uint32_t storage_size)
+        {
+            this->data.clear();
+            this->storage_size = storage_size;
+            for (int i = 0; i < storage_size; i++)
+                data.push_back({});
+        }
     };
 
 
@@ -30,10 +38,16 @@ namespace gml::vm::storage
 
     public:
         void push(const gml::type::value& val);
-        void pop();
+        gml::type::value pop();
         void dup();
         void swap();
         gml::type::value peek();
+
+        void init(uint32_t storage_size)
+        {
+            this->data.clear();
+            this->storage_size = storage_size;
+        }
 
     };
 

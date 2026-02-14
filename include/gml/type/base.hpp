@@ -3,6 +3,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
+#include <functional>
 
 
 

@@ -1,12 +1,11 @@
 
 #include <iostream>
 #include <iomanip>
-#include "gml/type/base.hpp"
-#include "gml/functions/binary.hpp"
 #include <string>
 #include <bitset>
 
-#include "gml/vm/storage.hpp"
+#include "gml/vm/vm.hpp"
+#include "gml/vm/instructions.hpp"
 
 
 namespace print_helper
@@ -27,29 +26,18 @@ namespace print_helper
 
 int main()
 {
-    gml::type::value g;
+    int program_size = 100;
+    int memory_size = 100;
+    int stack_size = 100;
+    std::vector<std::function<void(gml::vm::vm&, gml::type::value&)>> instr;
+    for (auto i : gml::vm::isa::instr)
+        instr.push_back(i.func);
 
-    g.u32 = 41;
+    gml::vm::vm vm(program_size, memory_size, stack_size, instr);
 
-    std::cout << std::setprecision(64) << std::fixed;
 
-    std::cout << "u32 : " << g.u32  << std::endl;
-    std::cout << "i32 : " << g.i32  << std::endl;
-    std::cout << "f32 : " << g.f32  << std::endl;
-    std::cout << "bool: " << g.b    << std::endl;
-    std::cout << "byte: " << print_helper::b_to_s(g) << std::endl;
-    std::cout << "c   : " << g.c << std::endl;
 
-    std::cout << "--------------" << std::endl;
 
-    std::cout << "OR : " << gml::function::binary::OR(g, g).b   << std::endl;
-    std::cout << "AND: " << gml::function::binary::AND(g, g).b  << std::endl;
-    std::cout << "XOR: " << gml::function::binary::XOR(g, g).b  << std::endl;
-    std::cout << "NOT: " << gml::function::binary::NOT(g).b     << std::endl;
-    std::cout << "SHL: " << print_helper::b_to_s(gml::function::binary::SHL(g))  << std::endl;
-    std::cout << "SHR: " << print_helper::b_to_s(gml::function::binary::SHR(g)) << std::endl;
-    std::cout << "ROL: " << print_helper::b_to_s(gml::function::binary::ROL(g)) << std::endl;
-    std::cout << "ROR: " << print_helper::b_to_s(gml::function::binary::ROR(g)) << std::endl;
 
     return 0;
 }

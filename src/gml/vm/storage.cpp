@@ -12,9 +12,12 @@ namespace gml::vm::storage
             this->data.push_back({val});
     }
 
-    void stack::pop()
+    gml::type::value stack::pop()
     {
+        gml::type::value tmp = {};
+        if (!this->data.empty()) tmp = data.back();
         if (this->data.size() > 0) this->data.pop_back();
+        return tmp;
     }
 
     void stack::dup()

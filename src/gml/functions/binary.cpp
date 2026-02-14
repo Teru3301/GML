@@ -1,5 +1,6 @@
 
 #include "gml/functions/binary.hpp"
+#include "gml/vm/storage.hpp"
 
 
 namespace gml::function::binary
