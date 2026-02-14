@@ -26,18 +26,15 @@ namespace print_helper
 
 int main()
 {
-    int program_size = 100;
-    int memory_size = 100;
+    int program_size = 1000;
+    int max_steps = 100;
+    int memory_size = 10;
     int stack_size = 100;
     std::vector<std::function<void(gml::vm::vm&, gml::type::value&)>> instr;
     for (auto i : gml::vm::isa::instr)
         instr.push_back(i.func);
 
-    gml::vm::vm vm(program_size, memory_size, stack_size, instr);
-
-
-
-
+    gml::vm::vm vm(program_size, max_steps, memory_size, stack_size, instr);
 
     return 0;
 }
