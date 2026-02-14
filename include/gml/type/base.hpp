@@ -3,7 +3,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <bitset>
 
 
 
@@ -16,9 +15,10 @@ namespace gml::type
         std::int32_t    i32;
         float           f32;
         struct {
-            bool b : 1;
+            bool        b : 1;
         };
-        std::byte byte[4];
+        std::byte       byte[4];
+        char            c;
     };
 
 }

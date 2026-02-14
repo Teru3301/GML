@@ -4,6 +4,9 @@
 #include "gml/type/base.hpp"
 #include "gml/functions/binary.hpp"
 #include <string>
+#include <bitset>
+
+#include "gml/vm/storage.hpp"
 
 
 namespace print_helper
@@ -26,7 +29,7 @@ int main()
 {
     gml::type::value g;
 
-    g.u32 = 42;
+    g.u32 = 41;
 
     std::cout << std::setprecision(64) << std::fixed;
 
@@ -35,6 +38,7 @@ int main()
     std::cout << "f32 : " << g.f32  << std::endl;
     std::cout << "bool: " << g.b    << std::endl;
     std::cout << "byte: " << print_helper::b_to_s(g) << std::endl;
+    std::cout << "c   : " << g.c << std::endl;
 
     std::cout << "--------------" << std::endl;
 
