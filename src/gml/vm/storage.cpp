@@ -22,12 +22,14 @@ namespace gml::vm::storage
 
     void stack::dup()
     {
+        if (this->data.size() < 1) return;
         if (this->data.size() < this->storage_size)
             this->data.push_back(this->data.back());
     }
 
     void stack::swap()
     {
+        if (this->data.size() < 2) return;
         gml::type::value tmp1 = this->data.back();
         this->pop();
         gml::type::value tmp2 = this->data.back();

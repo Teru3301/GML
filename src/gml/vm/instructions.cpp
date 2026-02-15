@@ -97,5 +97,53 @@ namespace gml::vm::isa
         vm.stack.push(gml::function::binary::ROR(vm.stack.pop()));
     }
 
+
+    void SCMV(gml::vm::vm& vm, gml::type::value& v)
+    {
+        vm.stack.push({vm.stack.pop().u32 > v.u32});
+    }
+
+    void VCMS(gml::vm::vm& vm, gml::type::value& v)
+    {
+        vm.stack.push({v.u32 > vm.stack.pop().u32});
+    }
+
+    void SCMS(gml::vm::vm& vm, gml::type::value& v)
+    {
+        gml::type::value a = vm.stack.pop();
+        gml::type::value b = vm.stack.pop();
+        vm.stack.push({a.u32 > b.u32});
+    }
+
+
+    uint32_t jump(uint32_t id, uint32_t len, int32_t shift)
+    {
+        shift += static_cast<int32_t>(id);
+        shift %= len;
+        return shift < 0 ? 0 : shift;
+    }
+
+    void SJMP(gml::vm::vm& vm, gml::type::value& v)
+    {
+        vm.id = jump(vm.id, vm.program.size(), vm.stack.pop().i32);
+    }
+
+    void JMP(gml::vm::vm& vm, gml::type::value& v)
+    {
+        vm.id = jump(vm.id, vm.program.size(), v.i32);
+    }
+
+    void SJNZ(gml::vm::vm& vm, gml::type::value& v)
+    {
+        if (vm.stack.pop().u32 != 0)
+            vm.id = jump(vm.id, vm.program.size(), v.i32);
+    }
+
+    void SJZ(gml::vm::vm& vm, gml::type::value& v)
+    {
+        if (vm.stack.pop().u32 == 0)
+            vm.id = jump(vm.id, vm.program.size(), v.i32);
+    }
+
 }
 

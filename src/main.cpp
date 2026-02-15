@@ -26,7 +26,7 @@ namespace print_helper
 
 int main()
 {
-    int program_size = 1000;
+    int program_size = 100;
     int max_steps = 100;
     int memory_size = 10;
     int stack_size = 100;
@@ -35,6 +35,11 @@ int main()
         instr.push_back(i.func);
 
     gml::vm::vm vm(program_size, max_steps, memory_size, stack_size, instr);
+
+    for (auto& i : vm.program)
+        i.u32 = rand() % 100;
+
+    vm.run();
 
     return 0;
 }

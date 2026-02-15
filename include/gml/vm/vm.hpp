@@ -14,7 +14,6 @@ namespace gml::vm
     class vm
     {
     private:
-        uint32_t id;
         uint32_t max_steps;
 
     public:
@@ -22,6 +21,7 @@ namespace gml::vm
         gml::vm::storage::stack         stack;
         std::vector<gml::type::value>   program;
         std::vector<std::function<void(gml::vm::vm&, gml::type::value&)>> instruction;
+        uint32_t id;
 
         vm(
             uint32_t program_size, uint32_t max_sateps,
@@ -43,13 +43,16 @@ namespace gml::vm
         {
             uint32_t step = 0;
             uint32_t opcode;
+            uint32_t old_id = 0;
+            this->id = 0;
 
             while (step < max_steps && this->id + 1 < program.size())
             {
+                old_id = this->id;
                 opcode = program[this->id].u32 % this->instruction.size();
                 auto& func = instruction[opcode];
                 func(*this, this->program[id+1]);
-                id += 2;
+                if (this->id == old_id) id += 2;
                 step++;
             }
         }

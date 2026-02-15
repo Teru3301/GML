@@ -22,12 +22,12 @@ namespace gml::vm::isa
     };
 
 
-    // memory
+    //  memory
     void MMS (gml::vm::vm& vm, gml::type::value& v);
     void MSM (gml::vm::vm& vm, gml::type::value& v);
     void MDEL(gml::vm::vm& vm, gml::type::value& v);
 
-    // stack
+    //  stack
     void POP (gml::vm::vm& vm, gml::type::value& v);
     void PUSH(gml::vm::vm& vm, gml::type::value& v);
     void DUP (gml::vm::vm& vm, gml::type::value& v);
@@ -43,6 +43,14 @@ namespace gml::vm::isa
     void SROL(gml::vm::vm& vm, gml::type::value& v);
     void SROR(gml::vm::vm& vm, gml::type::value& v);
 
+    void SCMV(gml::vm::vm& vm, gml::type::value& v);    //  stack.  CMP     compare stack value and program value. push result to stack
+    void VCMS(gml::vm::vm& vm, gml::type::value& v);    //  stack.  CMP     compare program value and stack value. push result to stack
+    void SCMS(gml::vm::vm& vm, gml::type::value& v);    //  stack.  CMP     compare stack and stack. push result to stack
+
+    void SJMP(gml::vm::vm& vm, gml::type::value& v);    //  stack.  JMP     jump stack value
+    void JMP(gml::vm::vm& vm, gml::type::value& v);     //  program.JMP     jump program value
+    void SJNZ(gml::vm::vm& vm, gml::type::value& v);    //  stack.  JMP     jump program value if stack value not zero
+    void SJZ(gml::vm::vm& vm, gml::type::value& v);     //  stack.  JMP     jump program value if stack value zero
 
     inline std::vector<instruction> instr = {
         {MMS,  "MMS"},
@@ -62,7 +70,15 @@ namespace gml::vm::isa
         {SSHL, "SSHL"},
         {SSHR, "SSHR"},
         {SROL, "SROL"},
-        {SROR, "SROR"}
+        {SROR, "SROR"},
+
+        {SCMV, "SCMV"},
+        {SCMS, "SCMS"},
+
+        {SJMP, "SJMP"},
+        {JMP, "JMP"},
+        {SJNZ, "SJNZ"},
+        {SJZ, "SJZ"}
     };
 
 }

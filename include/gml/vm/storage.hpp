@@ -24,8 +24,7 @@ namespace gml::vm::storage
         {
             this->data.clear();
             this->storage_size = storage_size;
-            for (int i = 0; i < storage_size; i++)
-                data.push_back({});
+            this->data.resize(storage_size);
         }
     };
 
