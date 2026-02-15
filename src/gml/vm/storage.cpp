@@ -30,10 +30,8 @@ namespace gml::vm::storage
     void stack::swap()
     {
         if (this->data.size() < 2) return;
-        gml::type::value tmp1 = this->data.back();
-        this->pop();
-        gml::type::value tmp2 = this->data.back();
-        this->pop();
+        gml::type::value tmp1 = this->pop();
+        gml::type::value tmp2 = this->pop();
         this->data.push_back(tmp1);
         this->data.push_back(tmp2);
     }

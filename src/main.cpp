@@ -1,4 +1,5 @@
 
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -26,20 +27,29 @@ namespace print_helper
 
 int main()
 {
-    int program_size = 100;
+    int program_size = 10;
     int max_steps = 100;
-    int memory_size = 10;
+    int input_size = 2;
+    int output_size = 1;
     int stack_size = 100;
     std::vector<std::function<void(gml::vm::vm&, gml::type::value&)>> instr;
-    for (auto i : gml::vm::isa::instr)
-        instr.push_back(i.func);
+    for (auto i : gml::vm::isa::instr) instr.push_back(i.func);
 
-    gml::vm::vm vm(program_size, max_steps, memory_size, stack_size, instr);
+    gml::vm::vm vm(program_size, max_steps, input_size, output_size, stack_size, instr);
 
-    for (auto& i : vm.program)
-        i.u32 = rand() % 100;
+    for (auto& i : vm.program) i.u32 = rand() % instr.size();
+    vm.input.write({0}, {254});
+    vm.input.write({1}, {1023});
 
     vm.run();
+
+    std::cout << vm.id << std::endl;
+    std::cout << "-------" << std::endl;
+    for (uint32_t i = 0; i < input_size; i++) std::cout << print_helper::b_to_s(vm.input.read({i})) << std::endl;
+    std::cout << "-------" << std::endl;
+    for (uint32_t i = 0; i < output_size; i++) std::cout << print_helper::b_to_s(vm.output.read({i})) << std::endl;
+    std::cout << "-------" << std::endl;
+    while(vm.stack.data.size()) std::cout << print_helper::b_to_s(vm.stack.pop()) << std::endl;
 
     return 0;
 }

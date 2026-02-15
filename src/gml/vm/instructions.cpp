@@ -7,19 +7,24 @@
 namespace gml::vm::isa
 {
 
-    void MMS(gml::vm::vm& vm, gml::type::value& v)
+    void IN(gml::vm::vm& vm, gml::type::value& v)
     {
-        vm.stack.push(vm.memory.read(v));
+        vm.stack.push(vm.input.read(v));
     }
 
-    void MSM(gml::vm::vm& vm, gml::type::value& v)
+    void OREAD(gml::vm::vm& vm, gml::type::value& v)
     {
-        vm.memory.write(v, vm.stack.peek());
+        vm.stack.push(vm.output.read(v));
     }
 
-    void MDEL(gml::vm::vm& vm, gml::type::value& v)
+    void OWRITE(gml::vm::vm& vm, gml::type::value& v)
     {
-        vm.memory.erase(v);
+        vm.output.write(v, vm.stack.peek());
+    }
+
+    void ODEL(gml::vm::vm& vm, gml::type::value& v)
+    {
+        vm.output.erase(v);
     }
 
 
@@ -118,9 +123,8 @@ namespace gml::vm::isa
 
     uint32_t jump(uint32_t id, uint32_t len, int32_t shift)
     {
-        shift += static_cast<int32_t>(id);
-        shift %= len;
-        return shift < 0 ? 0 : shift;
+        shift = (shift % static_cast<int32_t>(len) + len) % len;
+        return static_cast<uint32_t>(shift);
     }
 
     void SJMP(gml::vm::vm& vm, gml::type::value& v)

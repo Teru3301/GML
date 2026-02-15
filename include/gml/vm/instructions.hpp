@@ -22,10 +22,11 @@ namespace gml::vm::isa
     };
 
 
-    //  memory
-    void MMS (gml::vm::vm& vm, gml::type::value& v);
-    void MSM (gml::vm::vm& vm, gml::type::value& v);
-    void MDEL(gml::vm::vm& vm, gml::type::value& v);
+    // memory
+    void IN    (gml::vm::vm& vm, gml::type::value& v);  // read from input
+    void OREAD (gml::vm::vm& vm, gml::type::value& v);  // read from output
+    void OWRITE(gml::vm::vm& vm, gml::type::value& v);  // write to output
+    void ODEL  (gml::vm::vm& vm, gml::type::value& v);  // erase output
 
     //  stack
     void POP (gml::vm::vm& vm, gml::type::value& v);
@@ -53,9 +54,10 @@ namespace gml::vm::isa
     void SJZ(gml::vm::vm& vm, gml::type::value& v);     //  stack.  JMP     jump program value if stack value zero
 
     inline std::vector<instruction> instr = {
-        {MMS,  "MMS"},
-        {MSM,  "MSM"},
-        {MDEL, "MDEL"},
+        {IN,     "IN"},
+        {OREAD,  "OREAD"},
+        {OWRITE, "OWRITE"},
+        {ODEL,   "ODEL"},
 
         {POP,  "POP"},
         {PUSH, "PUSH"},
@@ -76,9 +78,9 @@ namespace gml::vm::isa
         {SCMS, "SCMS"},
 
         {SJMP, "SJMP"},
-        {JMP, "JMP"},
+        {JMP,  "JMP"},
         {SJNZ, "SJNZ"},
-        {SJZ, "SJZ"}
+        {SJZ,  "SJZ"}
     };
 
 }

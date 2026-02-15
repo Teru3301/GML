@@ -32,10 +32,10 @@ namespace gml::vm::storage
     class stack
     {
     private:
-        std::vector<gml::type::value> data;
         uint32_t storage_size = 10000;
 
     public:
+        std::vector<gml::type::value> data;
         void push(const gml::type::value& val);
         gml::type::value pop();
         void dup();
