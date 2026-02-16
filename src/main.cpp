@@ -1,12 +1,12 @@
 
 #include <cstdint>
 #include <iostream>
-#include <iomanip>
 #include <string>
 #include <bitset>
 
 #include "gml/vm/vm.hpp"
 #include "gml/vm/instructions.hpp"
+#include "gml/vm/interpreter.hpp"
 
 
 namespace print_helper
@@ -37,18 +37,29 @@ int main()
 
     gml::vm::vm vm(program_size, max_steps, input_size, output_size, stack_size, instr);
 
-    for (auto& i : vm.program) i.u32 = rand() % instr.size();
+    for (auto& i : vm.program) i.u32 = rand() % 100;
     vm.input.write({0}, {254});
     vm.input.write({1}, {1023});
 
     vm.run();
 
     std::cout << vm.id << std::endl;
-    std::cout << "-------" << std::endl;
+    std::cout << "------- input" << std::endl;
     for (uint32_t i = 0; i < input_size; i++) std::cout << print_helper::b_to_s(vm.input.read({i})) << std::endl;
-    std::cout << "-------" << std::endl;
+    std::cout << "------- output" << std::endl;
     for (uint32_t i = 0; i < output_size; i++) std::cout << print_helper::b_to_s(vm.output.read({i})) << std::endl;
+    std::cout << "------- stack" << std::endl;
+    while(vm.stack.data.size()) std::cout << print_helper::b_to_s(vm.stack.pop()) << std::endl;
+    std::cout << "------- assembly" << std::endl;
+    std::cout << gml::interpreter::translate_all(vm.program);
     std::cout << "-------" << std::endl;
+    
+    vm.run();
+    std::cout << "------- input" << std::endl;
+    for (uint32_t i = 0; i < input_size; i++) std::cout << print_helper::b_to_s(vm.input.read({i})) << std::endl;
+    std::cout << "------- output" << std::endl;
+    for (uint32_t i = 0; i < output_size; i++) std::cout << print_helper::b_to_s(vm.output.read({i})) << std::endl;
+    std::cout << "------- stack" << std::endl;
     while(vm.stack.data.size()) std::cout << print_helper::b_to_s(vm.stack.pop()) << std::endl;
 
     return 0;
