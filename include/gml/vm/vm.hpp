@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <functional>
-#include <iostream>
 #include "gml/vm/storage.hpp"
 
 namespace gml::vm
