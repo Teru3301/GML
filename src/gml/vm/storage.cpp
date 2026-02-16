@@ -8,7 +8,7 @@ namespace gml::vm::storage
     //      stack
     void stack::push(const gml::type::value& val)
     {
-        if (this->data.size() < this->data.size())
+        if (this->data.size() < this->storage_size)
             this->data.push_back({val});
     }
 

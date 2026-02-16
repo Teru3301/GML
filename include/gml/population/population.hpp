@@ -59,7 +59,23 @@ namespace gml::population
     class population
     {
     private:
+        gml::vm::vm tournament_select(uint32_t tournament_size)
+        {
+            gml::vm::vm* best = nullptr;
 
+            for (uint32_t i = 0; i < tournament_size; ++i)
+            {
+                uint32_t idx = rand() % members.size();
+                gml::vm::vm& candidate = members[idx];
+
+                if (!best || candidate.score > best->score)
+                {
+                    best = &candidate;
+                }
+            }
+
+            return *best;
+        }
 
     public:
         std::vector<gml::vm::vm> members;
@@ -110,6 +126,34 @@ namespace gml::population
                     return a.score > b.score;
                 });
         }
+
+
+        void next_generation(uint32_t elite_count, float mutation_rate)
+        {
+            // 1️⃣ Сортируем по убыванию fitness
+            sort_by_score();
+
+            std::vector<gml::vm::vm> new_members;
+
+            // 2️⃣ Элитизм — копируем лучших без изменений
+            for (uint32_t i = 0; i < elite_count && i < members.size(); ++i)
+            {
+                new_members.push_back(members[i]);
+            }
+
+            // 3️⃣ Остальных создаём через tournament selection + мутация
+            while (new_members.size() < members.size())
+            {
+                gml::vm::vm parent = tournament_select(3); // турнир из 3
+
+                parent.mutate(mutation_rate, -1);
+
+                new_members.push_back(parent);
+            }
+
+            members = std::move(new_members);
+        }
+
     };
 }
 

@@ -32,39 +32,46 @@ int main()
 
     gml::population::population p(
         10000,  //  propulation size
-        2,      //  size input memory
+        1,      //  size input memory
         1,      //  size output memory
         100,    //  size stack
-        20,     //  start program size
+        100,    //  start program size
         500,    //  maximum steps
         instr   //  instructions
     );
-    for (auto& m : p.members) m.mutate(0.1, 10);
+    for (auto& m : p.members) m.mutate(1, 10);
 
     gml::vm::vm member = p.members[0];
 
     std::vector<gml::population::example> dataset;
-    for (uint32_t i = 0; i < 1; i++)
+    for (uint32_t i = 0; i < 100; i++)
     {
         gml::population::example ex;
-        ex.input.data = {{i}, {i+1}, {2}};
-        ex.output.data = {{i-i-1}};
+        ex.input.data = {{i}, {i+1}};
+        ex.output.data = {{i+i+1}};
         dataset.push_back(ex);
 
         std::cout << i << "+" << i+1 << "=" << i+i+1 << std::endl;
         std::cout << print_helper::b_to_s(ex.output.data[0]) << std::endl;
     }
+    std::cout << "max score: " << dataset.size() * dataset[0].output.data.size() * 32 << std::endl;
     
-    p.evaluate(dataset);
-    p.sort_by_score();
 
-    for (uint32_t i = 0; i < 10; i++)
+    for (int i = 0; i < 6; i++)
+    {
+        std::cout << "ep: " << i << std::endl;
+        p.evaluate(dataset);
+        p.next_generation(10, 0.1);
+    }
+
+
+    for (uint32_t i = 0; i < 5; i++)
     {
         std::cout << "----------------" << std::endl;
         std::cout << gml::interpreter::translate_all(p.members[i].program);
     }
 
-    for (uint32_t i = 0; i < 10; i++)
+    for (uint32_t i = 0; i < 5; i++)
     {
         gml::vm::vm vm = p.members[i];
         std::cout << vm.score << std::endl;
@@ -79,6 +86,17 @@ int main()
             std::cout << "\t" << print_helper::b_to_s(m) << std::endl;
         std::cout << "----------------" << std::endl;
     }
+
+    
+    gml::vm::vm vm = p.members[0];
+
+    for (auto d : dataset)
+    {
+        vm.run(d.input.data);
+        uint32_t ansver = vm.output.read({0}).u32;
+        std::cout << d.input.data[0].u32 << "+" << d.input.data[1].u32 << "=" << ansver << " \t| " << d.output.read({0}).u32 << std::endl;
+    }
+
 
     return 0;
 }

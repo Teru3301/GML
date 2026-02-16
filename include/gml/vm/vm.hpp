@@ -58,11 +58,10 @@ namespace gml::vm
 
         void run(const std::vector<gml::type::value>& input)
         {
+            this->reset();
             uint32_t step = 0;
             this->id = 0;
             this->input.data = input;
-
-            this->reset();
 
             while (step < max_steps && id + 1 < program.size())
             {
