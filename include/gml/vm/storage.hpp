@@ -11,11 +11,11 @@ namespace gml::vm::storage
     class memory
     {
     private:
-        std::vector<gml::type::value> data;
         bool inited = false;
         uint32_t storage_size = 10000;
 
     public:
+        std::vector<gml::type::value> data;
         gml::type::value read(const gml::type::value& addr);
         void write(const gml::type::value& addr, const gml::type::value& val);
         void erase(const gml::type::value& addr);
@@ -32,9 +32,9 @@ namespace gml::vm::storage
     class stack
     {
     private:
-        uint32_t storage_size = 10000;
 
     public:
+        uint32_t storage_size = 10000;
         std::vector<gml::type::value> data;
         void push(const gml::type::value& val);
         gml::type::value pop();
@@ -54,9 +54,9 @@ namespace gml::vm::storage
     class reg
     {
     private:
-        std::vector<gml::type::value> data;
 
     public:
+        std::vector<gml::type::value> data;
 
 
     };

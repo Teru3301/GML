@@ -8,7 +8,7 @@ namespace gml::vm::storage
     //      stack
     void stack::push(const gml::type::value& val)
     {
-        if (this->data.size() < this->storage_size)
+        if (this->data.size() < this->data.size())
             this->data.push_back({val});
     }
 
@@ -23,7 +23,7 @@ namespace gml::vm::storage
     void stack::dup()
     {
         if (this->data.size() < 1) return;
-        if (this->data.size() < this->storage_size)
+        if (this->data.size() < this->data.size())
             this->data.push_back(this->data.back());
     }
 
@@ -46,21 +46,21 @@ namespace gml::vm::storage
     //      memory
     gml::type::value memory::read(const gml::type::value& addr)
     {
-        uint32_t addres = addr.u32 % this->storage_size;
+        uint32_t addres = addr.u32 % this->data.size();
         return this->data.at(addres);
     }
 
 
     void memory::write(const gml::type::value& addr, const gml::type::value& val)
     {
-        uint32_t addres = addr.u32 % this->storage_size;
+        uint32_t addres = addr.u32 % this->data.size();
         this->data[addres] = {val};
     }
 
 
     void memory::erase(const gml::type::value& addr)
     {
-        uint32_t addres = addr.u32 % this->storage_size;
+        uint32_t addres = addr.u32 % this->data.size();
         this->data[addres] = {};
     }
 

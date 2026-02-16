@@ -36,7 +36,6 @@ namespace gml::vm
             uint32_t stack_size,
             std::vector<std::function<void(gml::vm::vm&, gml::type::value&)>> instructions)
         {
-            this->input_size = input_size;
             this->output_size = output_size;
             this->stack_size = stack_size;
             this->program_size = program_size;
@@ -46,25 +45,24 @@ namespace gml::vm
 
             program.clear();
             program.resize(this->program_size);
-            input.init(this->input_size);
 
-            this->clear();
+            this->reset();
         }
 
-        void clear()
+        void reset()
         {
             output.init(output_size);
             stack.init(stack_size);
         }
 
 
-        void run()
+        void run(const std::vector<gml::type::value>& input)
         {
             uint32_t step = 0;
             this->id = 0;
-            this->score = 0;
+            this->input.data = input;
 
-            this->clear();
+            this->reset();
 
             while (step < max_steps && id + 1 < program.size())
             {
