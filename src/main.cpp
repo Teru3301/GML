@@ -54,6 +54,7 @@ int main()
     std::cout << gml::interpreter::translate_all(vm.program);
     std::cout << "-------" << std::endl;
     
+    vm.mutate(0.1, 100);
     vm.run();
     std::cout << "------- input" << std::endl;
     for (uint32_t i = 0; i < input_size; i++) std::cout << print_helper::b_to_s(vm.input.read({i})) << std::endl;
@@ -61,6 +62,8 @@ int main()
     for (uint32_t i = 0; i < output_size; i++) std::cout << print_helper::b_to_s(vm.output.read({i})) << std::endl;
     std::cout << "------- stack" << std::endl;
     while(vm.stack.data.size()) std::cout << print_helper::b_to_s(vm.stack.pop()) << std::endl;
+    std::cout << "------- assembly" << std::endl;
+    std::cout << gml::interpreter::translate_all(vm.program);
 
     return 0;
 }

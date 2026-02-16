@@ -81,6 +81,14 @@ namespace gml::vm
                 step++;
             }
         }
+
+
+        void mutate(double chance, uint32_t value)
+        {
+            for (auto& p : this->program)
+                if ((rand() % 1000) / 1000.0 < chance)
+                    p = {rand() % value};
+        }
     };
 }
 
