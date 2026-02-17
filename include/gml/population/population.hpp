@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <functional>
 #include <algorithm>
+#include <thread>
 
 #include "gml/vm/vm.hpp"
 
@@ -102,18 +103,63 @@ namespace gml::population
             }
         }
 
-        uint32_t evaluate(const std::vector<example>& dataset)
+        uint32_t evaluate(const std::vector<example>& dataset, uint32_t threads = 1)
         {
-            uint32_t best_score = 0;
-
-            for (auto& member : this->members)
+            if (threads <= 1)
             {
-                uint32_t s = fitness(member, dataset);
-                member.score = s;
+                uint32_t best_score = 0;
 
+                for (auto& member : this->members)
+                {
+                    uint32_t s = fitness(member, dataset);
+                    member.score = s;
+
+                    if (s > best_score)
+                        best_score = s;
+                }
+
+                return best_score;
+            }
+
+            std::vector<std::thread> workers;
+            std::vector<uint32_t> local_best(threads, 0);
+
+            uint32_t total = members.size();
+            uint32_t chunk = total / threads;
+            uint32_t remainder = total % threads;
+
+            uint32_t start = 0;
+
+            for (uint32_t t = 0; t < threads; ++t)
+            {
+                uint32_t end = start + chunk + (t < remainder ? 1 : 0);
+
+                workers.emplace_back([this, &dataset, start, end, &local_best, t]()
+                {
+                    uint32_t best_score = 0;
+
+                    for (uint32_t i = start; i < end; ++i)
+                    {
+                        uint32_t s = fitness(this->members[i], dataset);
+                        this->members[i].score = s;
+
+                        if (s > best_score)
+                            best_score = s;
+                    }
+
+                    local_best[t] = best_score;
+                });
+
+                start = end;
+            }
+
+            for (auto& w : workers)
+                w.join();
+
+            uint32_t best_score = 0;
+            for (auto s : local_best)
                 if (s > best_score)
                     best_score = s;
-            }
 
             return best_score;
         }
@@ -130,21 +176,18 @@ namespace gml::population
 
         void next_generation(uint32_t elite_count, float mutation_rate)
         {
-            // 1️⃣ Сортируем по убыванию fitness
             sort_by_score();
 
             std::vector<gml::vm::vm> new_members;
 
-            // 2️⃣ Элитизм — копируем лучших без изменений
             for (uint32_t i = 0; i < elite_count && i < members.size(); ++i)
             {
                 new_members.push_back(members[i]);
             }
 
-            // 3️⃣ Остальных создаём через tournament selection + мутация
             while (new_members.size() < members.size())
             {
-                gml::vm::vm parent = tournament_select(3); // турнир из 3
+                gml::vm::vm parent = tournament_select(3);
 
                 parent.mutate(mutation_rate, -1);
 

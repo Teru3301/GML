@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <bitset>
+#include <iomanip>
 
 #include "gml/vm/instructions.hpp"
 #include "gml/vm/interpreter.hpp"
@@ -32,9 +33,9 @@ int main()
 
     gml::population::population p(
         10000,  //  propulation size
-        1,      //  size input memory
+        2,      //  size input memory
         1,      //  size output memory
-        100,    //  size stack
+        200,    //  size stack
         100,    //  start program size
         500,    //  maximum steps
         instr   //  instructions
@@ -44,24 +45,31 @@ int main()
     gml::vm::vm member = p.members[0];
 
     std::vector<gml::population::example> dataset;
-    for (uint32_t i = 0; i < 100; i++)
+    for (uint32_t i = 0; i < 1000; i++)
     {
+        uint32_t a = rand();
+        uint32_t b = rand();
         gml::population::example ex;
-        ex.input.data = {{i}, {i+1}};
-        ex.output.data = {{i+i+1}};
+        ex.input.data = {{a}, {b}};
+        ex.output.data = {{a+b}};
         dataset.push_back(ex);
 
-        std::cout << i << "+" << i+1 << "=" << i+i+1 << std::endl;
+        std::cout << a << "+" << b << "=" << a+b << std::endl;
         std::cout << print_helper::b_to_s(ex.output.data[0]) << std::endl;
     }
-    std::cout << "max score: " << dataset.size() * dataset[0].output.data.size() * 32 << std::endl;
+    uint32_t max_score = dataset.size() * dataset[0].output.data.size() * 32;
+    std::cout << "max score: " << max_score << std::endl;
     
 
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 100; i++)
     {
-        std::cout << "ep: " << i << std::endl;
-        p.evaluate(dataset);
-        p.next_generation(10, 0.1);
+        std::cout << std::setprecision(3) << std::fixed;
+        uint32_t score = p.members[0].score;
+        double precent = static_cast<double>(score) / static_cast<double>(max_score) * 100.0;
+        std::cout << "ep: " << i << " \t score: " << score << " \t " << precent << "%" << std::endl;
+        p.evaluate(dataset, 40);
+        p.next_generation(10, 0.02);
+        if (precent > 99.9999) break;
     }
 
 
@@ -94,7 +102,20 @@ int main()
     {
         vm.run(d.input.data);
         uint32_t ansver = vm.output.read({0}).u32;
-        std::cout << d.input.data[0].u32 << "+" << d.input.data[1].u32 << "=" << ansver << " \t| " << d.output.read({0}).u32 << std::endl;
+        std::cout << d.input.data[0].u32 << "+" << d.input.data[1].u32 << "=" << ansver << "  \t| " << d.output.read({0}).u32 << std::endl;
+    }
+
+
+    while (true)
+    {
+        std::cout << "-------------" << std::endl;
+        uint32_t a;
+        uint32_t b;
+        std::cout << "a:"; std::cin >> a;
+        std::cout << "b:"; std::cin >> b;
+        std::cout << std::endl;
+        vm.run({{a}, {b}});
+        std::cout << a << "+" << b << "=" << vm.output.read({}).u32 << std::endl;
     }
 
 

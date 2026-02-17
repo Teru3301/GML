@@ -42,6 +42,7 @@ namespace gml::vm
             this->instruction = instructions;
             this->max_steps = max_steps;
             this->id = 0;
+            this->score = 0;
 
             program.clear();
             program.resize(this->program_size);
