@@ -123,8 +123,9 @@ namespace gml::vm::isa
 
     uint32_t jump(uint32_t id, uint32_t len, int32_t shift)
     {
-        shift = (shift % static_cast<int32_t>(len) + len) % len;
-        return static_cast<uint32_t>(shift);
+        int32_t target = static_cast<int32_t>(id) + shift;
+        target = (target % static_cast<int32_t>(len) + len) % len;
+        return static_cast<uint32_t>(target);
     }
 
     void SJMP(gml::vm::vm& vm, gml::type::value& v)

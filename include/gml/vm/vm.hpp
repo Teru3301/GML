@@ -3,7 +3,11 @@
 
 #include <vector>
 #include <functional>
+#include <random>
+
 #include "gml/vm/storage.hpp"
+
+
 
 namespace gml::vm
 {
@@ -80,12 +84,23 @@ namespace gml::vm
         }
 
 
-        void mutate(double chance, uint32_t value)
+        void mutate(double chance, uint32_t max_value)
         {
+            thread_local std::minstd_rand rng(std::random_device{}());
+
+            std::bernoulli_distribution mutate_dist(chance);
+            std::uniform_int_distribution<uint32_t> value_dist(0, max_value - 1);
+
             for (auto& p : this->program)
-                if ((rand() % 1000) / 1000.0 < chance)
-                    p = {rand() % value};
+            {
+                if (mutate_dist(rng))
+                {
+                    p = { value_dist(rng) };
+                }
+            }
         }
+
+
     };
 }
 

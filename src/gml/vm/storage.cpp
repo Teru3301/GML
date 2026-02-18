@@ -23,7 +23,7 @@ namespace gml::vm::storage
     void stack::dup()
     {
         if (this->data.size() < 1) return;
-        if (this->data.size() < this->data.size())
+        if (this->data.size() < this->storage_size)
             this->data.push_back(this->data.back());
     }
 

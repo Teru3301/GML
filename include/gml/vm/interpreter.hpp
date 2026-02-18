@@ -1,18 +1,30 @@
 
 #pragma once
 
-#include <iostream>
 #include "gml/type/base.hpp"
 #include "gml/vm/instructions.hpp"
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <bitset>
 
 
 
 
 namespace gml::interpreter
 {
+    std::string b_to_s(const gml::type::value& value)
+    {
+        std::bitset<32> bits(value.u32);
+        std::string s = bits.to_string();
+        
+        s.insert(8,  " ");  // после первых 8 бит
+        s.insert(17, " ");  // после следующих 8 бит (8+1+8=17)
+        s.insert(26, " ");  // после следующих 8 бит (17+1+8=26)
+        
+        return s;
+    }
+
 
     std::string translate(
         const gml::type::value& instruction,
@@ -24,6 +36,7 @@ namespace gml::interpreter
         std::string value = std::to_string(param.u32);
         return name + "\t" + value;
     }
+
 
     std::string translate_all(const std::vector<gml::type::value>& program)
     {
