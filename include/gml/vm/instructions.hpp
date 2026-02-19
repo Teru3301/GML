@@ -75,6 +75,7 @@ namespace gml::vm::isa
         {SROR, "SROR"},
 
         {SCMV, "SCMV"},
+        {VCMS, "VCMS"},
         {SCMS, "SCMS"},
 
         {SJMP, "SJMP"},

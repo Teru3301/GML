@@ -12,6 +12,8 @@
 #include <random>
 
 #include "gml/vm/vm.hpp"
+#include "gml/vm/instructions.hpp"
+#include "gml/vm/interpreter.hpp"
 
 
 
@@ -57,9 +59,9 @@ namespace gml::population
             }
         }
 
-        uint32_t program_len = 100;
-        if (vm.program.size() > program_len) score -= (vm.program.size() - program_len);
-
+        uint32_t program_len = 50;
+        if (vm.program.size() > program_len) score -= ((vm.program.size() - program_len) / 10);
+        
         return score;
     }
 
@@ -89,6 +91,7 @@ namespace gml::population
             return *best;
         }
 
+
         gml::vm::vm crossover(const gml::vm::vm& a, const gml::vm::vm& b)
         {
             thread_local std::minstd_rand rng(std::random_device{}());
@@ -96,11 +99,17 @@ namespace gml::population
             const auto& pa = a.program;
             const auto& pb = b.program;
 
-            if (pa.empty() || pb.empty()) return b;
+            if (pa.size() < 2 || pb.size() < 2)
+                return b;
 
-            std::uniform_int_distribution<size_t> distA(0, pa.size() - 1);
-            std::uniform_int_distribution<size_t> distB(0, pb.size() - 1);
+            // количество инструкций = size/2
+            size_t instrA = pa.size() >> 1;
+            size_t instrB = pb.size() >> 1;
 
+            std::uniform_int_distribution<size_t> distA(0, instrA - 1);
+            std::uniform_int_distribution<size_t> distB(0, instrB - 1);
+
+            // выбираем номер инструкции
             size_t a1 = distA(rng);
             size_t a2 = distA(rng);
             if (a1 > a2) std::swap(a1, a2);
@@ -111,19 +120,24 @@ namespace gml::population
             if (b1 > b2) std::swap(b1, b2);
             b2++;
 
+            // превращаем номер инструкции в индекс value
+            a1 <<= 1;
+            a2 <<= 1;
+            b1 <<= 1;
+            b2 <<= 1;
+
             gml::vm::vm child = b;
 
             std::vector<gml::type::value> new_program;
-            new_program.reserve(
-                pb.size() - (b2 - b1) + (a2 - a1)
-            );
+            new_program.reserve(pb.size() - (b2 - b1) + (a2 - a1));
+
+            auto it = new_program.begin();
 
             new_program.insert(new_program.end(), pb.begin(), pb.begin() + b1);
             new_program.insert(new_program.end(), pa.begin() + a1, pa.begin() + a2);
             new_program.insert(new_program.end(), pb.begin() + b2, pb.end());
 
             child.program = std::move(new_program);
-
             return child;
         }
 
@@ -218,6 +232,8 @@ namespace gml::population
                 if (s > best_score)
                     best_score = s;
 
+            sort_by_score();
+
             return best_score;
         }
 
@@ -233,23 +249,24 @@ namespace gml::population
 
         void next_generation(uint32_t elite_count, float mutation_rate)
         {
-            sort_by_score();
-
+            uint32_t old_members = this->members.size();
             std::vector<gml::vm::vm> new_members;
 
-            for (uint32_t i = 0; i < elite_count && i < members.size(); ++i)
+            uint32_t i = 0;
+            for (; i < elite_count && i < old_members; ++i)
             {
                 new_members.push_back(members[i]);
             }
 
-            while (new_members.size() < members.size())
+            while (new_members.size() < old_members)
             {
                 gml::vm::vm p1 = tournament_select(3);
                 gml::vm::vm p2 = tournament_select(3);
 
                 gml::vm::vm child = crossover(p1, p2);
 
-                child.mutate(mutation_rate, -1);
+                child.mutate(mutation_rate * (1.0 / static_cast<double>(old_members - i)), -1);
+                i++;
 
                 new_members.push_back(child);
             }
@@ -264,12 +281,14 @@ namespace gml::population
                 const std::vector<example>& dataset, 
                 uint32_t max_score,
                 double min_precent = 100.0,
+                bool print_program = false,
                 uint32_t threads = 1
                 )
         {
             uint32_t t0 = time(nullptr);    // начало всего обучения
             uint32_t t1 = t0;
             uint32_t t2 = t0;
+            uint32_t score = 0;
             std::cout << "------------------------------------" << std::endl;
             for (int ep = 0; ep < epochs; ep++)
             {
@@ -284,12 +303,23 @@ namespace gml::population
                 std::cout << "score: \t" << std::setprecision(2) << std::fixed
                     << individ.score << "/" << max_score << " \t "
                     << percent << "%" << std::endl;
+                std::cout << "size: " << individ.program.size() << std::endl;
+                if (print_program)
+                {
+                    if (score != individ.score) 
+                    {
+                        score = individ.score;
+                        std::cout << "code:" << std::endl;
+                        std::cout << gml::interpreter::translate_all(individ.program) << std::endl;
+                    }
+                }
                 std::cout << "------------------------------------" << std::endl;
                 if (percent >= min_precent)
                 {
                     std::cout << "epochs 1-" << ep << " \t time: " << t2 - t0 << "s.";
                     break;
                 }
+
             }
             std::cout << "epochs 1-" << epochs << " \t time: " << t2 - t0 << "s.";
             std::cout << std::endl;

@@ -44,7 +44,7 @@ namespace gml::interpreter
         uint32_t len = gml::vm::isa::instr.size();
         std::string str = "";
 
-        while(id + 1 < program.size())
+        while(id + 1 <= program.size())
         {
             str += translate(program[id], program[id+1], len) + '\n';
             id += 2;
