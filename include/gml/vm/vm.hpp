@@ -14,7 +14,6 @@ namespace gml::vm
     class vm
     {
     private:
-        uint32_t max_steps;
 
         uint32_t input_size;
         uint32_t output_size;
@@ -29,7 +28,7 @@ namespace gml::vm
         std::vector<gml::type::value> program;
         std::vector<std::function<void(gml::vm::vm&, gml::type::value&)>> instruction;
         uint32_t id;
-
+        uint32_t max_steps;
         int score;
 
         vm(
@@ -61,6 +60,13 @@ namespace gml::vm
         }
 
 
+        void execute(uint32_t opcode, gml::type::value& param)
+        {
+            auto& func = this->instruction[opcode];
+            func(*this, param);
+        }
+
+
         void run(const std::vector<gml::type::value>& input)
         {
             this->reset();
@@ -71,14 +77,9 @@ namespace gml::vm
             while (step < max_steps && id + 1 < program.size())
             {
                 uint32_t old_id = this->id;
-
                 uint32_t opcode = this->program[id].u32 % this->instruction.size();
-                auto& func = this->instruction[opcode];
-
-                func(*this, this->program[id + 1]);
-
+                this->execute(opcode, this->program[id + 1]);
                 if (this->id == old_id) this->id += 2;
-
                 step++;
             }
         }

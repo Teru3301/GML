@@ -53,5 +53,42 @@ namespace gml::interpreter
         return str;
     }
 
+
+    std::string debug_run(
+        gml::vm::vm& vm, 
+        const std::vector<gml::vm::isa::instruction>& instructions,
+        std::vector<gml::type::value> input
+        )
+    {
+        std::string log = "";
+
+        uint32_t len = gml::vm::isa::instr.size();
+        vm.reset();
+        uint32_t step = 0;
+        vm.id = 0;
+        vm.input.data = input;
+        
+        while (step < vm.max_steps && vm.id + 1 < vm.program.size())
+        {
+            log += translate(vm.program[vm.id], vm.program[vm.id+1], len) + "\n";
+            log += "id:    " + std::to_string(vm.id) + "\n";
+            log += "step : " + std::to_string(step) + "\n";
+            uint32_t old_id = vm.id;
+            uint32_t opcode = vm.program[vm.id].u32 % vm.instruction.size();
+            vm.execute(opcode, vm.program[vm.id + 1]);
+            if (vm.id == old_id) vm.id += 2;
+            step++;
+            log += "input:\n";
+            for (auto& m : vm.input.data) log += "\t" + b_to_s(m) + "\n";
+            log += "output:\n";
+            for (auto& m : vm.output.data) log += "\t" + b_to_s(m) + "\n";
+            log += "stack:\n";
+            for (auto& m : vm.stack.data) log += "\t" + b_to_s(m) + "\n";
+            log += "\n--------\n";
+        }
+
+        return log;
+    }
+
 }
 

@@ -5,6 +5,7 @@
 #include "gml/vm/instructions.hpp"
 #include "gml/vm/interpreter.hpp"
 #include "gml/population/population.hpp"
+#include "gml/type/dataset.hpp"
 #include <cmath>
 
 
@@ -22,21 +23,21 @@ int main()
         2,      //  размер входной памяти
         1,      //  размер вызодной памяти
         100,    //  размер стека
-        100,    //  начальный размер программы
+        500,    //  начальный размер программы
         200,    //  максимальное количество "ходов" программы
         instr   //  список инструкций
     );
 
     //  генерация датасета
 
-    std::vector<gml::population::example> dataset;
+    std::vector<gml::type::example> dataset;
     thread_local std::minstd_rand rng(std::random_device{}());
     std::uniform_int_distribution<uint32_t> rnd(0, -1);
-    for (uint32_t i = 0; i < 100; i++)
+    for (uint32_t i = 0; i < 1000; i++)
     {
         uint32_t a = rnd(rng);
         uint32_t b = rnd(rng);
-        gml::population::example ex;
+        gml::type::example ex;
         ex.input.data = {{a}, {b}};
         ex.output.data = {{a+b}};
         dataset.push_back(ex);
@@ -45,11 +46,11 @@ int main()
     {
         uint32_t a = std::pow(2, i) - 1;
         uint32_t b = 1;
-        gml::population::example ex;
+        gml::type::example ex;
         ex.input.data = {{a}, {b}};
         ex.output.data = {{a+b}};
         dataset.push_back(ex);
-        gml::population::example ex2;
+        gml::type::example ex2;
         ex2.input.data = {{b}, {a}};
         ex2.output.data = {{a+b}};
         dataset.push_back(ex2);
@@ -88,11 +89,17 @@ int main()
     while (true)
     {
         std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << "---------------------------" << std::endl;
+        std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << std::endl;
         uint32_t a;
         uint32_t b;
         std::cout << "a="; std::cin >> a;
         std::cout << "b="; std::cin >> b;
-        best_individ.run({{a},{b}});
+        std::cout << gml::interpreter::debug_run(best_individ, gml::vm::isa::instr, {{a}, {b}});
         gml::type::value o = best_individ.output.read({});
         std::cout << a << "+" << b << "=" << o.u32 << " \t | " << a+b << std::endl;
         std::cout << "o: " << gml::interpreter::b_to_s(o) << std::endl;

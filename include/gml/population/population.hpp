@@ -14,21 +14,13 @@
 #include "gml/vm/vm.hpp"
 #include "gml/vm/instructions.hpp"
 #include "gml/vm/interpreter.hpp"
+#include "gml/type/dataset.hpp"
 
 
 
 namespace gml::population
 {
-    struct example
-    {
-        gml::vm::storage::memory input;
-        gml::vm::storage::memory output;
-        gml::vm::storage::stack stack;
-        gml::vm::storage::reg registr;
-    };
-
-
-    uint32_t fitness(gml::vm::vm& vm, const std::vector<example>& dataset)
+    uint32_t fitness(gml::vm::vm& vm, const std::vector<gml::type::example>& dataset)
     {
         uint32_t score = 0;
 
@@ -59,7 +51,7 @@ namespace gml::population
             }
         }
 
-        uint32_t program_len = 50;
+        uint32_t program_len = 150;
         if (vm.program.size() > program_len) score -= ((vm.program.size() - program_len) / 10);
         
         return score;
@@ -174,7 +166,7 @@ namespace gml::population
         }
 
 
-        uint32_t evaluate(const std::vector<example>& dataset, uint32_t threads = 1)
+        uint32_t evaluate(const std::vector<gml::type::example>& dataset, uint32_t threads = 1)
         {
             if (threads <= 1)
             {
@@ -278,7 +270,7 @@ namespace gml::population
         void train(
                 uint32_t epochs, 
                 uint32_t elite, float mutation_rate, 
-                const std::vector<example>& dataset, 
+                const std::vector<gml::type::example>& dataset, 
                 uint32_t max_score,
                 double min_precent = 100.0,
                 bool print_program = false,
