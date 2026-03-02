@@ -28,13 +28,17 @@ namespace gml::interpreter
 
     std::string translate(
         const gml::type::value& instruction,
-        const gml::type::value& param,
+        const gml::type::value& v1,
+        const gml::type::value& v2,
+        const gml::type::value& v3,
         const uint32_t len
     )
     {
         std::string name = gml::vm::isa::instr[instruction.u32 % len].name;
-        std::string value = std::to_string(param.u32);
-        return name + "\t" + value;
+        std::string value1 = std::to_string(v1.u32);
+        std::string value2 = std::to_string(v2.u32);
+        std::string value3 = std::to_string(v3.u32);
+        return name + "\t" + value1 + "\t" + value2 + "\t" + value3;
     }
 
 
@@ -46,8 +50,8 @@ namespace gml::interpreter
 
         while(id + 1 <= program.size())
         {
-            str += translate(program[id], program[id+1], len) + '\n';
-            id += 2;
+            str += translate(program[id], program[id+1], program[id+2], program[id+3], len) + '\n';
+            id += 4;
         }
 
         return str;
@@ -68,15 +72,15 @@ namespace gml::interpreter
         vm.id = 0;
         vm.input.data = input;
         
-        while (step < vm.max_steps && vm.id + 1 < vm.program.size())
+        while (step < vm.max_steps && vm.id + 3 < vm.program.size())
         {
-            log += translate(vm.program[vm.id], vm.program[vm.id+1], len) + "\n";
+            log += translate(vm.program[vm.id], vm.program[vm.id+1], vm.program[vm.id+2], vm.program[vm.id+3], len) + "\n";
             log += "id:    " + std::to_string(vm.id) + "\n";
             log += "step : " + std::to_string(step) + "\n";
             uint32_t old_id = vm.id;
             uint32_t opcode = vm.program[vm.id].u32 % vm.instruction.size();
-            vm.execute(opcode, vm.program[vm.id + 1]);
-            if (vm.id == old_id) vm.id += 2;
+            vm.execute(opcode, vm.program[vm.id + 1], vm.program[vm.id + 2], vm.program[vm.id + 3]);
+            if (vm.id == old_id) vm.id += 4;
             step++;
             log += "input:\n";
             for (auto& m : vm.input.data) log += "\t" + b_to_s(m) + "\n";

@@ -26,7 +26,7 @@ namespace gml::vm
         gml::vm::storage::stack  stack;
 
         std::vector<gml::type::value> program;
-        std::vector<std::function<void(gml::vm::vm&, gml::type::value&)>> instruction;
+        std::vector<std::function<void(gml::vm::vm&, gml::type::value&, gml::type::value&, gml::type::value&)>> instruction;
         uint32_t id;
         uint32_t max_steps;
         int score;
@@ -37,7 +37,7 @@ namespace gml::vm
             uint32_t input_size,
             uint32_t output_size,
             uint32_t stack_size,
-            std::vector<std::function<void(gml::vm::vm&, gml::type::value&)>> instructions)
+            std::vector<std::function<void(gml::vm::vm&, gml::type::value&, gml::type::value&, gml::type::value&)>> instructions)
         {
             this->output_size = output_size;
             this->stack_size = stack_size;
@@ -60,10 +60,10 @@ namespace gml::vm
         }
 
 
-        void execute(uint32_t opcode, gml::type::value& param)
+        void execute(uint32_t opcode, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3)
         {
             auto& func = this->instruction[opcode];
-            func(*this, param);
+            func(*this, v1, v2, v3);
         }
 
 
@@ -74,12 +74,12 @@ namespace gml::vm
             this->id = 0;
             this->input.data = input;
 
-            while (step < max_steps && id + 1 < program.size())
+            while (step < max_steps && id + 3 < program.size())
             {
                 uint32_t old_id = this->id;
                 uint32_t opcode = this->program[id].u32 % this->instruction.size();
-                this->execute(opcode, this->program[id + 1]);
-                if (this->id == old_id) this->id += 2;
+                this->execute(opcode, this->program[id + 1], this->program[id + 2], this->program[id + 3]);
+                if (this->id == old_id) this->id += 4;
                 step++;
             }
         }

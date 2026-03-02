@@ -51,7 +51,7 @@ namespace gml::population
             }
         }
 
-        uint32_t program_len = 150;
+        uint32_t program_len = 200;
         if (vm.program.size() > program_len) score -= ((vm.program.size() - program_len) / 10);
         
         return score;
@@ -91,39 +91,39 @@ namespace gml::population
             const auto& pa = a.program;
             const auto& pb = b.program;
 
-            if (pa.size() < 2 || pb.size() < 2)
+            // теперь минимальная программа = 1 инструкция = 4 слова
+            if (pa.size() < 4 || pb.size() < 4)
                 return b;
 
-            // количество инструкций = size/2
-            size_t instrA = pa.size() >> 1;
-            size_t instrB = pb.size() >> 1;
+            // количество инструкций = size / 4
+            size_t instrA = pa.size() >> 2;
+            size_t instrB = pb.size() >> 2;
 
             std::uniform_int_distribution<size_t> distA(0, instrA - 1);
             std::uniform_int_distribution<size_t> distB(0, instrB - 1);
 
-            // выбираем номер инструкции
+            // выбираем диапазон инструкций в A
             size_t a1 = distA(rng);
             size_t a2 = distA(rng);
             if (a1 > a2) std::swap(a1, a2);
             a2++;
 
+            // выбираем диапазон инструкций в B
             size_t b1 = distB(rng);
             size_t b2 = distB(rng);
             if (b1 > b2) std::swap(b1, b2);
             b2++;
 
-            // превращаем номер инструкции в индекс value
-            a1 <<= 1;
-            a2 <<= 1;
-            b1 <<= 1;
-            b2 <<= 1;
+            // переводим номера инструкций в индексы value
+            a1 <<= 2;   // *4
+            a2 <<= 2;
+            b1 <<= 2;
+            b2 <<= 2;
 
             gml::vm::vm child = b;
 
             std::vector<gml::type::value> new_program;
             new_program.reserve(pb.size() - (b2 - b1) + (a2 - a1));
-
-            auto it = new_program.begin();
 
             new_program.insert(new_program.end(), pb.begin(), pb.begin() + b1);
             new_program.insert(new_program.end(), pa.begin() + a1, pa.begin() + a2);
@@ -144,7 +144,7 @@ namespace gml::population
             uint32_t stack_size,
             uint32_t program_size,
             uint32_t max_steps,
-            std::vector<std::function<void(gml::vm::vm&, gml::type::value&)>> instructions
+            std::vector<std::function<void(gml::vm::vm&, gml::type::value&, gml::type::value&, gml::type::value&)>> instructions
         )
         {
             for (uint32_t i = 0; i < size; i++)

@@ -7,43 +7,43 @@
 namespace gml::vm::isa
 {
 
-    void IN(gml::vm::vm& vm, gml::type::value& v)
+    void IN(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
     {
-        vm.stack.push(vm.input.read(v));
+        vm.stack.push(vm.input.read(v1));
     }
 
-    void OREAD(gml::vm::vm& vm, gml::type::value& v)
+    void OREAD(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
     {
-        vm.stack.push(vm.output.read(v));
+        vm.stack.push(vm.output.read(v1));
     }
 
-    void OWRITE(gml::vm::vm& vm, gml::type::value& v)
+    void OWRITE(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
     {
-        vm.output.write(v, vm.stack.peek());
+        vm.output.write(v1, vm.stack.peek());
     }
 
-    void ODEL(gml::vm::vm& vm, gml::type::value& v)
+    void ODEL(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
     {
-        vm.output.erase(v);
+        vm.output.erase(v1);
     }
 
 
-    void POP(gml::vm::vm& vm, gml::type::value& v)
+    void POP(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         vm.stack.pop();
     }
 
-    void PUSH(gml::vm::vm& vm, gml::type::value& v)
+    void PUSH(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
     {
-        vm.stack.push(v);
+        vm.stack.push(v1);
     }
 
-    void DUP(gml::vm::vm& vm, gml::type::value& v)
+    void DUP(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         vm.stack.push(vm.stack.peek());
     }
 
-    void SWAP(gml::vm::vm& vm, gml::type::value& v)
+    void SWAP(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         auto a = vm.stack.pop();
         auto b = vm.stack.pop();
@@ -52,109 +52,104 @@ namespace gml::vm::isa
         vm.stack.push(b);
     }
 
-    
-    void SOR(gml::vm::vm& vm, gml::type::value& v)
+
+    void SOR(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         auto b = vm.stack.pop();
         auto a = vm.stack.pop();
-
         vm.stack.push(gml::function::binary::OR(a, b));
     }
 
-    void SAND(gml::vm::vm& vm, gml::type::value& v)
+    void SAND(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         auto b = vm.stack.pop();
         auto a = vm.stack.pop();
-
         vm.stack.push(gml::function::binary::AND(a, b));
     }
 
-    void SXOR(gml::vm::vm& vm, gml::type::value& v)
+    void SXOR(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         auto b = vm.stack.pop();
         auto a = vm.stack.pop();
-
         vm.stack.push(gml::function::binary::XOR(a, b));
     }
 
-    void SNOT(gml::vm::vm& vm, gml::type::value& v)
+    void SNOT(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         vm.stack.push(gml::function::binary::NOT(vm.stack.pop()));
     }
 
-    void SSHL(gml::vm::vm& vm, gml::type::value& v)
+    void SSHL(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         vm.stack.push(gml::function::binary::SHL(vm.stack.pop()));
     }
 
-    void SSHR(gml::vm::vm& vm, gml::type::value& v)
+    void SSHR(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         vm.stack.push(gml::function::binary::SHR(vm.stack.pop()));
     }
 
-    void SROL(gml::vm::vm& vm, gml::type::value& v)
+    void SROL(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         vm.stack.push(gml::function::binary::ROL(vm.stack.pop()));
     }
 
-    void SROR(gml::vm::vm& vm, gml::type::value& v)
+    void SROR(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         vm.stack.push(gml::function::binary::ROR(vm.stack.pop()));
     }
 
 
-    void SCMV(gml::vm::vm& vm, gml::type::value& v)
+    void SCMV(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
     {
-        vm.stack.push({vm.stack.pop().u32 > v.u32});
+        vm.stack.push({ vm.stack.pop().u32 > v1.u32 });
     }
 
-    void VCMS(gml::vm::vm& vm, gml::type::value& v)
+    void VCMS(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
     {
-        vm.stack.push({v.u32 > vm.stack.pop().u32});
+        vm.stack.push({ v1.u32 > vm.stack.pop().u32 });
     }
 
-    void SCMS(gml::vm::vm& vm, gml::type::value& v)
+    void SCMS(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         gml::type::value a = vm.stack.pop();
         gml::type::value b = vm.stack.pop();
-        vm.stack.push({a.u32 > b.u32});
+        vm.stack.push({ a.u32 > b.u32 });
     }
 
 
     uint32_t jump(int32_t id, uint32_t len, int32_t shift)
     {
-        //int32_t target = static_cast<int32_t>(id) + shift + (shift % 2);
-        //target = (target % static_cast<int32_t>(len) + len) % len;
-        //return static_cast<uint32_t>(target);
-
         shift %= static_cast<int32_t>(len);
-        shift += shift % 2;
+        shift += shift % 4;
         id += shift;
+
         if (id < 0) id = 0;
-        if (id > len) id = len;
+        if (id > static_cast<int32_t>(len)) id = len;
+
         return static_cast<uint32_t>(id);
     }
 
-    void SJMP(gml::vm::vm& vm, gml::type::value& v)
+    void SJMP(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
     {
         vm.id = jump(vm.id, vm.program.size(), vm.stack.pop().i32);
     }
 
-    void JMP(gml::vm::vm& vm, gml::type::value& v)
+    void JMP(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
     {
-        vm.id = jump(vm.id, vm.program.size(), v.i32);
+        vm.id = jump(vm.id, vm.program.size(), v1.i32);
     }
 
-    void SJNZ(gml::vm::vm& vm, gml::type::value& v)
+    void SJNZ(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
     {
         if (vm.stack.pop().u32 != 0)
-            vm.id = jump(vm.id, vm.program.size(), v.i32);
+            vm.id = jump(vm.id, vm.program.size(), v1.i32);
     }
 
-    void SJZ(gml::vm::vm& vm, gml::type::value& v)
+    void SJZ(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
     {
         if (vm.stack.pop().u32 == 0)
-            vm.id = jump(vm.id, vm.program.size(), v.i32);
+            vm.id = jump(vm.id, vm.program.size(), v1.i32);
     }
 
 }

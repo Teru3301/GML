@@ -12,46 +12,53 @@ namespace gml::vm::isa
     class instruction
     {
     public:
-        std::function <void(gml::vm::vm&, gml::type::value&)> func;
+        std::function<void(gml::vm::vm&,
+                           gml::type::value&,
+                           gml::type::value&,
+                           gml::type::value&)> func;
+
         std::string name;
 
         instruction(
-            std::function<void(gml::vm::vm&, gml::type::value&)> f,
+            std::function<void(gml::vm::vm&,
+                               gml::type::value&,
+                               gml::type::value&,
+                               gml::type::value&)> f,
             const std::string& n
         ) : func(f), name(n) {}
     };
 
 
     // memory
-    void IN    (gml::vm::vm& vm, gml::type::value& v);  // read from input
-    void OREAD (gml::vm::vm& vm, gml::type::value& v);  // read from output
-    void OWRITE(gml::vm::vm& vm, gml::type::value& v);  // write to output
-    void ODEL  (gml::vm::vm& vm, gml::type::value& v);  // erase output
+    void IN    (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void OREAD (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void OWRITE(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void ODEL  (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
-    //  stack
-    void POP (gml::vm::vm& vm, gml::type::value& v);
-    void PUSH(gml::vm::vm& vm, gml::type::value& v);
-    void DUP (gml::vm::vm& vm, gml::type::value& v);
-    void SWAP(gml::vm::vm& vm, gml::type::value& v);
+    // stack
+    void POP (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void PUSH(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void DUP (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void SWAP(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
-    void SOR (gml::vm::vm& vm, gml::type::value& v);
-    void SAND(gml::vm::vm& vm, gml::type::value& v);
-    void SXOR(gml::vm::vm& vm, gml::type::value& v);
-    void SNOT(gml::vm::vm& vm, gml::type::value& v);
+    void SOR (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void SAND(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void SXOR(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void SNOT(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
-    void SSHL(gml::vm::vm& vm, gml::type::value& v);
-    void SSHR(gml::vm::vm& vm, gml::type::value& v);
-    void SROL(gml::vm::vm& vm, gml::type::value& v);
-    void SROR(gml::vm::vm& vm, gml::type::value& v);
+    void SSHL(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void SSHR(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void SROL(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void SROR(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
-    void SCMV(gml::vm::vm& vm, gml::type::value& v);    //  stack.  CMP     compare stack value and program value. push result to stack
-    void VCMS(gml::vm::vm& vm, gml::type::value& v);    //  stack.  CMP     compare program value and stack value. push result to stack
-    void SCMS(gml::vm::vm& vm, gml::type::value& v);    //  stack.  CMP     compare stack and stack. push result to stack
+    void SCMV(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void VCMS(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void SCMS(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
-    void SJMP(gml::vm::vm& vm, gml::type::value& v);    //  stack.  JMP     jump stack value
-    void JMP(gml::vm::vm& vm, gml::type::value& v);     //  program.JMP     jump program value
-    void SJNZ(gml::vm::vm& vm, gml::type::value& v);    //  stack.  JMP     jump program value if stack value not zero
-    void SJZ(gml::vm::vm& vm, gml::type::value& v);     //  stack.  JMP     jump program value if stack value zero
+    void SJMP(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void JMP (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void SJNZ(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    void SJZ (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
     inline std::vector<instruction> instr = {
         {IN,     "IN"},     //  копирование из входной памяти в стек
@@ -83,6 +90,7 @@ namespace gml::vm::isa
         {SJNZ, "SJNZ"},     //  переход на (значение параметра) позиций, если значение стека != 0
         {SJZ,  "SJZ"}       //  переход на (значение параметра) позиций, если занчение стека == 0
     };
+
 
 }
 

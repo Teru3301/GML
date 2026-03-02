@@ -15,7 +15,7 @@ int main()
     
     //  создание популяции
 
-    std::vector<std::function<void(gml::vm::vm&, gml::type::value&)>> instr;
+    std::vector<std::function<void(gml::vm::vm&, gml::type::value&, gml::type::value&, gml::type::value&)>> instr;
     for (auto i : gml::vm::isa::instr) instr.push_back(i.func);
 
     gml::population::population p(
@@ -61,7 +61,7 @@ int main()
     //  обучение
 
     p.train(
-        200,        //  количество эпох
+        100,        //  количество эпох
         10,         //  количество элитных особей
         0.001,      //  щанс мутации (для каждой ячейки)
         dataset,    //  датасет
