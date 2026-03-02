@@ -54,34 +54,34 @@ namespace gml::vm::isa
     void SJZ(gml::vm::vm& vm, gml::type::value& v);     //  stack.  JMP     jump program value if stack value zero
 
     inline std::vector<instruction> instr = {
-        {IN,     "IN"},
-        {OREAD,  "OREAD"},
-        {OWRITE, "OWRITE"},
-        {ODEL,   "ODEL"},
+        {IN,     "IN"},     //  копирование из входной памяти в стек
+        {OREAD,  "OREAD"},  //  копирование из выходной памяти в стек
+        {OWRITE, "OWRITE"}, //  запись в выходную память из стека
+        {ODEL,   "ODEL"},   //  запись нуля в выходную память
 
-        {POP,  "POP"},
-        {PUSH, "PUSH"},
-        {DUP,  "DUP"},
-        {SWAP, "SWAP"},
+        {POP,  "POP"},      //  удаление верхнего элемента стека
+        {PUSH, "PUSH"},     //  добавление селемента в верх стека
+        {DUP,  "DUP"},      //  дублирование верхнего элемента стека
+        {SWAP, "SWAP"},     //  обмен местами верхних элементов тека
 
-        {SOR,  "SOR"},
-        {SAND, "SAND"},
-        {SXOR, "SXOR"},
-        {SNOT, "SNOT"},
+        {SOR,  "SOR"},      //  логическое или
+        {SAND, "SAND"},     //  логическое и
+        {SXOR, "SXOR"},     //  исключающее или
+        {SNOT, "SNOT"},     //  инверсия
 
-        {SSHL, "SSHL"},
-        {SSHR, "SSHR"},
-        {SROL, "SROL"},
-        {SROR, "SROR"},
+        {SSHL, "SSHL"},     //  сдвиг в лево
+        {SSHR, "SSHR"},     //  сдвиг в право
+        {SROL, "SROL"},     //  циклический сдвиг в лево
+        {SROR, "SROR"},     //  циклический сдвиг в право
 
-        {SCMV, "SCMV"},
-        {VCMS, "VCMS"},
-        {SCMS, "SCMS"},
+        {SCMV, "SCMV"},     //  значение стека > значение параметра
+        {VCMS, "VCMS"},     //  значение параметра > значение стека
+        {SCMS, "SCMS"},     //  значение стека > значение стека
 
-        {SJMP, "SJMP"},
-        {JMP,  "JMP"},
-        {SJNZ, "SJNZ"},
-        {SJZ,  "SJZ"}
+        {SJMP, "SJMP"},     //  без условный переход на (значение из стека) позиций
+        {JMP,  "JMP"},      //  без условынй переход на (значение параметра) позиций
+        {SJNZ, "SJNZ"},     //  переход на (значение параметра) позиций, если значение стека != 0
+        {SJZ,  "SJZ"}       //  переход на (значение параметра) позиций, если занчение стека == 0
     };
 
 }
