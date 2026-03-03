@@ -7,119 +7,13 @@
 namespace gml::vm::isa
 {
 
-    void IN(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
+    //==================================================
+    // вспомогательный jump (как в старой версии)
+    //==================================================
+
+    static uint32_t jump(uint32_t id, uint32_t len, uint32_t shift, bool add)
     {
-        vm.stack.push(vm.input.read(v1));
-    }
-
-    void OREAD(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
-    {
-        vm.stack.push(vm.output.read(v1));
-    }
-
-    void OWRITE(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
-    {
-        vm.output.write(v1, vm.stack.peek());
-    }
-
-    void ODEL(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
-    {
-        vm.output.erase(v1);
-    }
-
-
-    void POP(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        vm.stack.pop();
-    }
-
-    void PUSH(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
-    {
-        vm.stack.push(v1);
-    }
-
-    void DUP(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        vm.stack.push(vm.stack.peek());
-    }
-
-    void SWAP(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        auto a = vm.stack.pop();
-        auto b = vm.stack.pop();
-
-        vm.stack.push(a);
-        vm.stack.push(b);
-    }
-
-
-    void SOR(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        auto b = vm.stack.pop();
-        auto a = vm.stack.pop();
-        vm.stack.push(gml::function::binary::OR(a, b));
-    }
-
-    void SAND(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        auto b = vm.stack.pop();
-        auto a = vm.stack.pop();
-        vm.stack.push(gml::function::binary::AND(a, b));
-    }
-
-    void SXOR(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        auto b = vm.stack.pop();
-        auto a = vm.stack.pop();
-        vm.stack.push(gml::function::binary::XOR(a, b));
-    }
-
-    void SNOT(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        vm.stack.push(gml::function::binary::NOT(vm.stack.pop()));
-    }
-
-    void SSHL(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        vm.stack.push(gml::function::binary::SHL(vm.stack.pop()));
-    }
-
-    void SSHR(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        vm.stack.push(gml::function::binary::SHR(vm.stack.pop()));
-    }
-
-    void SROL(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        vm.stack.push(gml::function::binary::ROL(vm.stack.pop()));
-    }
-
-    void SROR(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        vm.stack.push(gml::function::binary::ROR(vm.stack.pop()));
-    }
-
-
-    void SCMV(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
-    {
-        vm.stack.push({ vm.stack.pop().u32 > v1.u32 });
-    }
-
-    void VCMS(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
-    {
-        vm.stack.push({ v1.u32 > vm.stack.pop().u32 });
-    }
-
-    void SCMS(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
-    {
-        gml::type::value a = vm.stack.pop();
-        gml::type::value b = vm.stack.pop();
-        vm.stack.push({ a.u32 > b.u32 });
-    }
-
-
-    uint32_t jump(int32_t id, uint32_t len, int32_t shift)
-    {
+        /*
         shift %= static_cast<int32_t>(len);
         shift += shift % 4;
         id += shift;
@@ -128,28 +22,273 @@ namespace gml::vm::isa
         if (id > static_cast<int32_t>(len)) id = len;
 
         return static_cast<uint32_t>(id);
+    */
+        shift %= 4;
+        if (add)
+        {
+            id += shift;
+        }
+        else
+        {
+            id = (id >= shift ? id - shift : 0);
+        }
+        return id;
     }
 
-    void SJMP(gml::vm::vm& vm, gml::type::value&, gml::type::value&, gml::type::value&)
+    //==================================================
+    // MOV
+    // v1 - адрес в mem
+    // v2 - адрес в reg
+    // v3 - mode: 0 mem->reg, 1 reg->mem
+    //==================================================
+
+    void MOV(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value& v2,
+             gml::type::value& v3)
     {
-        vm.id = jump(vm.id, vm.program.size(), vm.stack.pop().i32);
+        uint32_t mode = v3.u32 % 7;
+
+        gml::type::value val;
+
+        switch (mode)
+        {
+            //==============================
+            // input → mem
+            //==============================
+            case 0:
+                val = vm.input.read(v1);
+                vm.mem.write(v2, val);
+                break;
+
+            //==============================
+            // input → reg
+            //==============================
+            case 1:
+                val = vm.input.read(v1);
+                vm.reg.write(v2, val);
+                break;
+
+            //==============================
+            // input → output
+            //==============================
+            case 2:
+                val = vm.input.read(v1);
+                vm.output.write(v2, val);
+                break;
+
+            //==============================
+            // mem → reg
+            //==============================
+            case 3:
+                val = vm.mem.read(v1);
+                vm.reg.write(v2, val);
+                break;
+
+            //==============================
+            // mem → output
+            //==============================
+            case 4:
+                val = vm.mem.read(v1);
+                vm.output.write(v2, val);
+                break;
+
+            //==============================
+            // reg → mem
+            //==============================
+            case 5:
+                val = vm.reg.read(v1);
+                vm.mem.write(v2, val);
+                break;
+
+            //==============================
+            // reg → output
+            //==============================
+            case 6:
+                val = vm.reg.read(v1);
+                vm.output.write(v2, val);
+                break;
+        }
     }
 
-    void JMP(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
+    //==================================================
+    // DEL
+    // v1 - адрес
+    // v2 - 0 reg, 1 mem
+    //==================================================
+
+    void DEL(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value& v2,
+             gml::type::value&)
     {
-        vm.id = jump(vm.id, vm.program.size(), v1.i32);
+        if ((v2.u32 & 1) == 0)
+            vm.reg.erase(v1);
+        else
+            vm.mem.erase(v1);
     }
 
-    void SJNZ(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
+    //==================================================
+    // SWP (регистр ↔ регистр)
+    //==================================================
+
+    void SWP(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value& v2,
+             gml::type::value&)
     {
-        if (vm.stack.pop().u32 != 0)
-            vm.id = jump(vm.id, vm.program.size(), v1.i32);
+        auto a = vm.reg.read(v1);
+        auto b = vm.reg.read(v2);
+
+        vm.reg.write(v1, b);
+        vm.reg.write(v2, a);
     }
 
-    void SJZ(gml::vm::vm& vm, gml::type::value& v1, gml::type::value&, gml::type::value&)
+    //==================================================
+    // Логические операции (только регистры)
+    //==================================================
+
+    void OR(gml::vm::vm& vm,
+            gml::type::value& v1,
+            gml::type::value& v2,
+            gml::type::value& v3)
     {
-        if (vm.stack.pop().u32 == 0)
-            vm.id = jump(vm.id, vm.program.size(), v1.i32);
+        auto a = vm.reg.read(v1);
+        auto b = vm.reg.read(v2);
+        vm.reg.write(v3, gml::function::binary::OR(a, b));
+    }
+
+    void AND(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value& v2,
+             gml::type::value& v3)
+    {
+        auto a = vm.reg.read(v1);
+        auto b = vm.reg.read(v2);
+        vm.reg.write(v3, gml::function::binary::AND(a, b));
+    }
+
+    void XOR(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value& v2,
+             gml::type::value& v3)
+    {
+        auto a = vm.reg.read(v1);
+        auto b = vm.reg.read(v2);
+        vm.reg.write(v3, gml::function::binary::XOR(a, b));
+    }
+
+    //==================================================
+    // Унарные операции
+    //==================================================
+
+    void NOT(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value&,
+             gml::type::value&)
+    {
+        auto a = vm.reg.read(v1);
+        vm.reg.write(v1, gml::function::binary::NOT(a));
+    }
+
+    void SHL(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value&,
+             gml::type::value&)
+    {
+        auto a = vm.reg.read(v1);
+        vm.reg.write(v1, gml::function::binary::SHL(a));
+    }
+
+    void SHR(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value&,
+             gml::type::value&)
+    {
+        auto a = vm.reg.read(v1);
+        vm.reg.write(v1, gml::function::binary::SHR(a));
+    }
+
+    void ROL(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value&,
+             gml::type::value&)
+    {
+        auto a = vm.reg.read(v1);
+        vm.reg.write(v1, gml::function::binary::ROL(a));
+    }
+
+    void ROR(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value&,
+             gml::type::value&)
+    {
+        auto a = vm.reg.read(v1);
+        vm.reg.write(v1, gml::function::binary::ROR(a));
+    }
+
+    //==================================================
+    // CMP
+    // v3 = FFFF... если v1 > v2 иначе 0
+    //==================================================
+
+    void CMP(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value& v2,
+             gml::type::value& v3)
+    {
+        auto a = vm.reg.read(v1);
+        auto b = vm.reg.read(v2);
+
+        gml::type::value result;
+        result.u32 = (a.u32 > b.u32) ? 0xFFFFFFFFu : 0u;
+
+        vm.reg.write(v3, result);
+    }
+
+    //==================================================
+    // JMP
+    //==================================================
+
+    void JMP(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value& v2,
+             gml::type::value& v3)
+    {
+        auto shift = vm.reg.read(v1);
+        vm.id = jump(vm.id, vm.program.size(), shift.i32, v3.u32%2==1);
+    }
+
+    //==================================================
+    // JZ
+    //==================================================
+
+    void JZ(gml::vm::vm& vm,
+            gml::type::value& v1,
+            gml::type::value& v2,
+            gml::type::value& v3)
+    {
+        auto shift = vm.reg.read(v1);
+        auto cond  = vm.reg.read(v2);
+
+        if (cond.u32 == 0)
+            vm.id = jump(vm.id, vm.program.size(), shift.i32, v3.u32%2==1);
+    }
+
+    //==================================================
+    // JNZ
+    //==================================================
+
+    void JNZ(gml::vm::vm& vm,
+             gml::type::value& v1,
+             gml::type::value& v2,
+             gml::type::value& v3)
+    {
+        auto shift = vm.reg.read(v1);
+        auto cond  = vm.reg.read(v2);
+
+        if (cond.u32 != 0)
+            vm.id = jump(vm.id, vm.program.size(), shift.i32, v3.u32%2==1);
     }
 
 }

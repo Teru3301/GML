@@ -48,7 +48,7 @@ namespace gml::interpreter
         uint32_t len = gml::vm::isa::instr.size();
         std::string str = "";
 
-        while(id + 1 <= program.size())
+        while(id + 3 <= program.size())
         {
             str += translate(program[id], program[id+1], program[id+2], program[id+3], len) + '\n';
             id += 4;
@@ -77,10 +77,8 @@ namespace gml::interpreter
             log += translate(vm.program[vm.id], vm.program[vm.id+1], vm.program[vm.id+2], vm.program[vm.id+3], len) + "\n";
             log += "id:    " + std::to_string(vm.id) + "\n";
             log += "step : " + std::to_string(step) + "\n";
-            uint32_t old_id = vm.id;
             uint32_t opcode = vm.program[vm.id].u32 % vm.instruction.size();
             vm.execute(opcode, vm.program[vm.id + 1], vm.program[vm.id + 2], vm.program[vm.id + 3]);
-            if (vm.id == old_id) vm.id += 4;
             step++;
             log += "input:\n";
             for (auto& m : vm.input.data) log += "\t" + b_to_s(m) + "\n";

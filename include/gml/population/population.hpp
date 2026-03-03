@@ -51,8 +51,8 @@ namespace gml::population
             }
         }
 
-        uint32_t program_len = 200;
-        if (vm.program.size() > program_len) score -= ((vm.program.size() - program_len) / 10);
+        uint32_t program_len = 10;
+        if (vm.program.size() > program_len) score -= ((vm.program.size() - program_len) / 5);
         
         return score;
     }

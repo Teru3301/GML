@@ -28,69 +28,118 @@ namespace gml::vm::isa
         ) : func(f), name(n) {}
     };
 
+    //  register
+    
+    //  копирование между памятью и регистрами
+    //  v1 - адрес в кеше
+    //  v2 - адрес в регистре
+    //  v3 - если %2 == 0, из mem в reg; если %2 == 1, из reg в mem
+    void MOV(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
-    // memory
-    void IN    (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void OREAD (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void OWRITE(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void ODEL  (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    //  очистка значения
+    //  v1 - адрес
+    //  v2 - если %2 == 0, затирание reg, если %2 == 1, затирание mem
+    //  v3 - не используется
+    void DEL(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    
+    //  обмен местами значений в регистре
+    //  v1 - адрес
+    //  v2 - адрес
+    //  v3 - не используется
+    void SWP(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
-    // stack
-    void POP (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void PUSH(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void DUP (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void SWAP(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    //  логическое или
+    //  v1 - адрес первого параметра
+    //  v2 - адрес второго параметра
+    //  v3 - адрес записи результата
+    void OR(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
-    void SOR (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void SAND(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void SXOR(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void SNOT(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    //  логическое и
+    //  v1 - адрес первого параметра
+    //  v2 - адрес второго параметра
+    //  v3 - адрес записи результата
+    void AND(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
-    void SSHL(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void SSHR(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void SROL(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void SROR(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    //  исключающее или
+    //  v1 - адрес первого параметра
+    //  v2 - адрес второго параметра
+    //  v3 - адрес записи результата
+    void XOR(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
-    void SCMV(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void VCMS(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void SCMS(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    //  логическое не
+    //  v1 - адрес параметра
+    //  v2 - не используется
+    //  v3 - не используется
+    void NOT(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
-    void SJMP(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void JMP (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void SJNZ(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
-    void SJZ (gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+    //  логический сдвиг в лево
+    //  v1 - адрес параметра
+    //  v2 - не используется
+    //  v3 - не используется
+    void SHL(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+
+    //  логический сдвиг в право
+    //  v1 - адрес параметра
+    //  v2 - не используется
+    //  v3 - не используется
+    void SHR(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+
+    //  циклический сдвиг в лево
+    //  v1 - адрес параметра
+    //  v2 - не используется
+    //  v3 - не используется
+    void ROL(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+
+    //  циклический сдвиг в право
+    //  v1 - адрес параметра
+    //  v2 - не используется
+    //  v3 - не используется
+    void ROR(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+
+    //  сравнение
+    //  v1 - адрес первого параметра    a
+    //  v2 - адрес второго параметра    b
+    //  v3 - адрес записи результата    a > b ? FFFF...FFFF : 0000...0000
+    void CMP(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+
+    //  безусловный переход
+    //  v1 - адрес параметра перерехода
+    //  v2 - не используется
+    //  v3 - %2 ? 1 вперёд : 0 назад
+    void JMP(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+
+    //  условный переход
+    //  v1 - адрес параметра перехода
+    //  v2 - адрес проверяегомого значения
+    //  v3 - %2 ? 1 вперёд : 0 назад
+    void JZ(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
+
+    //  условный переход
+    //  v1 - адрес параметра перехода
+    //  v2 - адрес проверяегомого значения
+    //  v3 - %2 ? 1 вперёд : 0 назад
+    void JNZ(gml::vm::vm& vm, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3);
 
     inline std::vector<instruction> instr = {
-        {IN,     "IN"},     //  копирование из входной памяти в стек
-        {OREAD,  "OREAD"},  //  копирование из выходной памяти в стек
-        {OWRITE, "OWRITE"}, //  запись в выходную память из стека
-        {ODEL,   "ODEL"},   //  запись нуля в выходную память
+        {MOV, "MOV"},
+        {DEL, "DEL"},
+        {SWP, "SWP"},
 
-        {POP,  "POP"},      //  удаление верхнего элемента стека
-        {PUSH, "PUSH"},     //  добавление селемента в верх стека
-        {DUP,  "DUP"},      //  дублирование верхнего элемента стека
-        {SWAP, "SWAP"},     //  обмен местами верхних элементов тека
+        {OR, "OR"},
+        {AND, "AND"},
+        {XOR, "XOR"},
+        {NOT, "NOT"},
 
-        {SOR,  "SOR"},      //  логическое или
-        {SAND, "SAND"},     //  логическое и
-        {SXOR, "SXOR"},     //  исключающее или
-        {SNOT, "SNOT"},     //  инверсия
+        {SHL, "SHL"},
+        {SHR, "SHR"},
+        {ROL, "ROL"},
+        {ROR, "ROR"},
 
-        {SSHL, "SSHL"},     //  сдвиг в лево
-        {SSHR, "SSHR"},     //  сдвиг в право
-        {SROL, "SROL"},     //  циклический сдвиг в лево
-        {SROR, "SROR"},     //  циклический сдвиг в право
-
-        {SCMV, "SCMV"},     //  значение стека > значение параметра
-        {VCMS, "VCMS"},     //  значение параметра > значение стека
-        {SCMS, "SCMS"},     //  значение стека > значение стека
-
-        {SJMP, "SJMP"},     //  без условный переход на (значение из стека) позиций
-        {JMP,  "JMP"},      //  без условынй переход на (значение параметра) позиций
-        {SJNZ, "SJNZ"},     //  переход на (значение параметра) позиций, если значение стека != 0
-        {SJZ,  "SJZ"}       //  переход на (значение параметра) позиций, если занчение стека == 0
+        {CMP, "CMP"},
+        {JMP, "JMP"},
+        {JZ, "JZ"},
+        {JNZ, "JNZ"}
     };
-
 
 }
 

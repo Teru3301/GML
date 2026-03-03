@@ -6,7 +6,6 @@
 #include "gml/vm/interpreter.hpp"
 #include "gml/population/population.hpp"
 #include "gml/type/dataset.hpp"
-#include <cmath>
 
 
 
@@ -23,8 +22,8 @@ int main()
         2,      //  размер входной памяти
         1,      //  размер выходной памяти
         100,    //  размер стека
-        500,    //  начальный размер программы
-        150,    //  максимальное количество "ходов" программы
+        100,    //  начальный размер программы
+        1000,   //  максимальное количество "ходов" программы
         instr   //  список инструкций
     );
 
@@ -33,15 +32,17 @@ int main()
     std::vector<gml::type::example> dataset;
     thread_local std::minstd_rand rng(std::random_device{}());
     std::uniform_int_distribution<uint32_t> rnd(0, -1);
-    for (uint32_t i = 0; i < 100; i++)
+    for (uint32_t i = 0; i < 1000; i++)
     {
-        uint32_t a = rnd(rng);
-        uint32_t b = rnd(rng);
+        uint32_t mx = 1000000000;
+        uint32_t a = rnd(rng) % mx;
+        uint32_t b = rnd(rng) % mx;
         gml::type::example ex;
         ex.input.data = {{a}, {b}};
         ex.output.data = {{a+b}};
         dataset.push_back(ex);
     }
+    /*
     for (uint32_t i = 0; i <= 31; i++)
     {
         uint32_t a = std::pow(2, i) - 1;
@@ -55,6 +56,7 @@ int main()
         ex2.output.data = {{a+b}};
         dataset.push_back(ex2);
     }
+    */
     uint32_t max_score = dataset.size() * dataset[0].output.data.size() * 32;
     std::cout << "max score: " << max_score << std::endl;
 
@@ -62,8 +64,8 @@ int main()
 
     p.train(
         100,        //  количество эпох
-        10,         //  количество элитных особей
-        0.001,      //  щанс мутации (для каждой ячейки)
+        100,        //  количество элитных особей
+        0.005,      //  щанс мутации (для каждой ячейки)
         dataset,    //  датасет
         max_score,  //  максимальное количество очков для датасета
         100.0,      //  балл при достижении которого обучение будет остановлено

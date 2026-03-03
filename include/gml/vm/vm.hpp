@@ -19,10 +19,14 @@ namespace gml::vm
         uint32_t output_size;
         uint32_t stack_size;
         uint32_t program_size;
+        uint32_t register_size;
+        uint32_t mem_size;
 
     public:
-        gml::vm::storage::memory input;   // read-only from ISA
-        gml::vm::storage::memory output;  // full access
+        gml::vm::storage::memory input;     // read-only from ISA
+        gml::vm::storage::memory output;    // full access
+        gml::vm::storage::memory reg;       // full access
+        gml::vm::storage::memory mem;       // full access
         gml::vm::storage::stack  stack;
 
         std::vector<gml::type::value> program;
@@ -39,6 +43,8 @@ namespace gml::vm
             uint32_t stack_size,
             std::vector<std::function<void(gml::vm::vm&, gml::type::value&, gml::type::value&, gml::type::value&)>> instructions)
         {
+            this->register_size = 4;
+            this->mem_size = 1;
             this->output_size = output_size;
             this->stack_size = stack_size;
             this->program_size = program_size;
@@ -55,15 +61,19 @@ namespace gml::vm
 
         void reset()
         {
-            output.init(output_size);
-            stack.init(stack_size);
+            this->output.init(this->output_size);
+            this->stack.init(this->stack_size);
+            this->reg.init(this->register_size);
+            this->mem.init(this->mem_size);
         }
 
 
         void execute(uint32_t opcode, gml::type::value& v1, gml::type::value& v2, gml::type::value& v3)
         {
+            uint32_t old_id = this->id;
             auto& func = this->instruction[opcode];
             func(*this, v1, v2, v3);
+            if (this->id == old_id) this->id += 4;
         }
 
 
@@ -76,10 +86,8 @@ namespace gml::vm
 
             while (step < max_steps && id + 3 < program.size())
             {
-                uint32_t old_id = this->id;
                 uint32_t opcode = this->program[id].u32 % this->instruction.size();
                 this->execute(opcode, this->program[id + 1], this->program[id + 2], this->program[id + 3]);
-                if (this->id == old_id) this->id += 4;
                 step++;
             }
         }
